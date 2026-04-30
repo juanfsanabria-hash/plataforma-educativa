@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.db.models import Count, Avg, Q
+from django.views.decorators.http import require_http_methods
 from accounts.models import CustomUser, Institution
+from accounts.forms import LoginForm, RegisterForm
 from academic.models import Course, Enrollment, Grade, Attendance
 from administrative.models import Payment, StudentProfile
 
@@ -20,6 +23,96 @@ def role_required(roles):
             return view_func(request, *args, **kwargs)
         return wrapper
     return decorator
+
+
+@require_http_methods(["GET", "POST"])
+def login_view(request):
+    """
+    Login view with email/password authentication.
+    GET: Display login form
+    POST: Authenticate user and create session
+    """
+    # Redirect if already authenticated
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            # Handle "remember me"
+            if form.cleaned_data.get('remember_me'):
+                request.session.set_expiry(60 * 60 * 24 * 30)  # 30 días
+            else:
+                request.session.set_expiry(0)  # Browser close
+
+            messages.success(request, f'¡Bienvenido {user.get_full_name()}!')
+            return redirect('home')
+        else:
+            # Display form errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = LoginForm()
+
+    context = {
+        'form': form,
+        'page_title': 'Iniciar Sesión',
+    }
+    return render(request, 'auth/login.html', context)
+
+
+@require_http_methods(["GET", "POST"])
+def register_view(request):
+    """
+    Registration view for new users.
+    GET: Display registration form
+    POST: Create new user account
+    """
+    # Redirect if already authenticated
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            # Create user
+            user = form.save()
+
+            # Send welcome message
+            messages.success(
+                request,
+                f'¡Cuenta creada exitosamente! Por favor inicia sesión.'
+            )
+
+            # Redirect to login
+            return redirect('login')
+        else:
+            # Display form errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = RegisterForm()
+
+    context = {
+        'form': form,
+        'page_title': 'Crear Cuenta',
+    }
+    return render(request, 'auth/register.html', context)
+
+
+@require_http_methods(["POST"])
+def logout_view(request):
+    """
+    Logout view - terminates user session.
+    """
+    logout(request)
+    messages.success(request, '¡Hasta luego! Has cerrado sesión.')
+    return redirect('login')
 
 
 @login_required

@@ -13,6 +13,9 @@ from administrative.views import StudentProfileViewSet, PaymentViewSet
 from communication.views import AnnouncementViewSet, MessageViewSet, NotificationViewSet
 from core.views import (
     home,
+    login_view,
+    register_view,
+    logout_view,
     admin_dashboard,
     director_dashboard,
     docente_dashboard,
@@ -44,6 +47,11 @@ router.register(r'messages', MessageViewSet, basename='message')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
+    # Authentication views (HTML)
+    path('login/', login_view, name='login'),
+    path('register/', register_view, name='register'),
+    path('logout/', logout_view, name='logout'),
+
     # Dashboard views (HTML)
     path('', home, name='home'),
     path('dashboard/admin/', admin_dashboard, name='admin-dashboard'),
