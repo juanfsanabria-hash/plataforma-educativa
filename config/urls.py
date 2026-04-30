@@ -11,6 +11,14 @@ from accounts.views import CustomUserViewSet, InstitutionViewSet, AcademicYearVi
 from academic.views import CourseViewSet, EnrollmentViewSet, GradeViewSet, AttendanceViewSet
 from administrative.views import StudentProfileViewSet, PaymentViewSet
 from communication.views import AnnouncementViewSet, MessageViewSet, NotificationViewSet
+from core.views import (
+    home,
+    admin_dashboard,
+    director_dashboard,
+    docente_dashboard,
+    estudiante_dashboard,
+    padre_dashboard,
+)
 
 # API Router
 router = DefaultRouter()
@@ -36,7 +44,18 @@ router.register(r'messages', MessageViewSet, basename='message')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
+    # Dashboard views (HTML)
+    path('', home, name='home'),
+    path('dashboard/admin/', admin_dashboard, name='admin-dashboard'),
+    path('dashboard/director/', director_dashboard, name='director-dashboard'),
+    path('dashboard/docente/', docente_dashboard, name='docente-dashboard'),
+    path('dashboard/estudiante/', estudiante_dashboard, name='estudiante-dashboard'),
+    path('dashboard/padre/', padre_dashboard, name='padre-dashboard'),
+
+    # Admin interface
     path('admin/', admin.site.urls),
+
+    # REST API endpoints
     path('api/v1/', include(router.urls)),
     path('api/v1/auth/', include('rest_framework.urls')),
     path('api-token-auth/', authtoken_views.obtain_auth_token, name='api-token-auth'),

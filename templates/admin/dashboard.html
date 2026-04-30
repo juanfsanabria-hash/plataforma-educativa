@@ -1,0 +1,253 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard Admin - Plataforma Educativa{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Page Header -->
+    <div class="sm:flex sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard Administrativo</h1>
+            <p class="mt-2 text-gray-600">Resumen general del sistema educativo</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+            <button onclick="location.href='/admin/'" class="px-4 py-2 bg-edu-primary text-white rounded-lg hover:bg-blue-700 transition">
+                Ir a Admin Django
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Estudiantes -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-primary">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium">Total Estudiantes</p>
+                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ total_students }}</p>
+                    <p class="mt-2 text-xs text-gray-500">Activos en el sistema</p>
+                </div>
+                <div class="text-4xl">👨‍🎓</div>
+            </div>
+        </div>
+
+        <!-- Total Docentes -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-secondary">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium">Total Docentes</p>
+                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ total_teachers }}</p>
+                    <p class="mt-2 text-xs text-gray-500">Docentes registrados</p>
+                </div>
+                <div class="text-4xl">👨‍🏫</div>
+            </div>
+        </div>
+
+        <!-- Total Cursos -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-accent">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium">Total Cursos</p>
+                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ total_courses }}</p>
+                    <p class="mt-2 text-xs text-gray-500">Cursos activos</p>
+                </div>
+                <div class="text-4xl">📚</div>
+            </div>
+        </div>
+
+        <!-- Pagos Pendientes -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium">Pagos Pendientes</p>
+                    <p class="mt-2 text-3xl font-bold text-red-600">{{ pending_payments }}</p>
+                    <p class="mt-2 text-xs text-gray-500">Cuentas por cobrar</p>
+                </div>
+                <div class="text-4xl">💰</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Row KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Asistencia Promedio -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-gray-600 text-sm font-medium">Asistencia Promedio</p>
+            <div class="mt-4 flex items-baseline">
+                <p class="text-3xl font-bold text-green-600">{{ avg_attendance }}%</p>
+                <span class="ml-2 text-sm text-green-600">↑ +2.5%</span>
+            </div>
+            <p class="mt-4 text-xs text-gray-500">Comparado al período anterior</p>
+        </div>
+
+        <!-- Promedio General -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-gray-600 text-sm font-medium">Promedio Académico</p>
+            <div class="mt-4 flex items-baseline">
+                <p class="text-3xl font-bold text-blue-600">{{ avg_gpa }}</p>
+                <span class="ml-2 text-sm text-gray-500">De 10.0</span>
+            </div>
+            <p class="mt-4 text-xs text-gray-500">Promedio de todas las calificaciones</p>
+        </div>
+
+        <!-- Instituciones -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-gray-600 text-sm font-medium">Instituciones</p>
+            <div class="mt-4 flex items-baseline">
+                <p class="text-3xl font-bold text-purple-600">{{ total_institutions }}</p>
+                <span class="ml-2 text-sm text-green-600">Activas</span>
+            </div>
+            <p class="mt-4 text-xs text-gray-500">Instituciones en el sistema</p>
+        </div>
+    </div>
+
+    <!-- Two Column Section: Acciones Rápidas + Notificaciones -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Acciones Rápidas -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Acciones Rápidas</h3>
+            <div class="space-y-3">
+                <a href="/admin/accounts/customuser/add/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
+                    <span class="text-2xl mr-3">➕</span>
+                    <div>
+                        <p class="font-medium text-gray-900">Crear Usuario</p>
+                        <p class="text-sm text-gray-500">Agregar estudiante, docente o padre</p>
+                    </div>
+                </a>
+
+                <a href="/admin/academic/course/add/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
+                    <span class="text-2xl mr-3">📖</span>
+                    <div>
+                        <p class="font-medium text-gray-900">Crear Curso</p>
+                        <p class="text-sm text-gray-500">Agregar nueva asignatura</p>
+                    </div>
+                </a>
+
+                <a href="/admin/academic/enrollment/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
+                    <span class="text-2xl mr-3">📝</span>
+                    <div>
+                        <p class="font-medium text-gray-900">Gestionar Matrículas</p>
+                        <p class="text-sm text-gray-500">Ver y crear matrículas</p>
+                    </div>
+                </a>
+
+                <a href="/admin/administrative/payment/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
+                    <span class="text-2xl mr-3">💳</span>
+                    <div>
+                        <p class="font-medium text-gray-900">Ver Pagos</p>
+                        <p class="text-sm text-gray-500">Gestionar cuentas por cobrar</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Notificaciones/Alertas -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Alertas del Sistema</h3>
+            <div class="space-y-3">
+                <!-- Alert 1 -->
+                <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">⚠️</span>
+                        <div class="flex-1">
+                            <p class="font-medium text-red-900">Pagos Atrasados</p>
+                            <p class="text-sm text-red-700">{{ pending_payments }} estudiantes con pagos pendientes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert 2 -->
+                <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">📊</span>
+                        <div class="flex-1">
+                            <p class="font-medium text-yellow-900">Bajo Rendimiento</p>
+                            <p class="text-sm text-yellow-700">5 estudiantes con GPA &lt; 6.0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert 3 -->
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">ℹ️</span>
+                        <div class="flex-1">
+                            <p class="font-medium text-blue-900">Asistencia Baja</p>
+                            <p class="text-sm text-blue-700">3 estudiantes con &lt; 80% de asistencia</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert 4 -->
+                <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">✅</span>
+                        <div class="flex-1">
+                            <p class="font-medium text-green-900">Sistema Operativo</p>
+                            <p class="text-sm text-green-700">Todas las transacciones funcionando correctamente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tablas de Datos -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-6">Últimas Actividades</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-medium text-gray-700">Actividad</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-700">Usuario</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-700">Fecha</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-700">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">Nuevo estudiante registrado</td>
+                        <td class="px-4 py-3">Juan Pérez</td>
+                        <td class="px-4 py-3">Hoy 10:30 AM</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">Completado</span></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">Curso creado</td>
+                        <td class="px-4 py-3">María García</td>
+                        <td class="px-4 py-3">Hoy 09:15 AM</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">En Proceso</span></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">Pago registrado</td>
+                        <td class="px-4 py-3">Carlos López</td>
+                        <td class="px-4 py-3">Ayer 03:45 PM</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">Completado</span></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">Matrícula actualizada</td>
+                        <td class="px-4 py-3">Ana Rodríguez</td>
+                        <td class="px-4 py-3">Ayer 01:20 PM</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">Completado</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- API Documentation Link -->
+    <div class="bg-gradient-to-r from-edu-primary to-edu-secondary rounded-lg shadow p-8 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-2xl font-bold">API REST Documentada</h3>
+                <p class="mt-2 opacity-90">Accede a la documentación interactiva de Swagger/OpenAPI para integración</p>
+            </div>
+            <div>
+                <a href="/api/docs/" class="px-6 py-3 bg-white text-edu-primary font-medium rounded-lg hover:bg-gray-100 transition">
+                    Ver Documentación API
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

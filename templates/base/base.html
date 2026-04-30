@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Plataforma Educativa{% endblock %}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'edu-primary': '#3b82f6',
+                        'edu-secondary': '#8b5cf6',
+                        'edu-accent': '#ec4899',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Additional CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-gradient-to-br from-edu-primary to-edu-secondary rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">📚</span>
+                        </div>
+                        <span class="text-xl font-bold text-gray-900">Plataforma Educativa</span>
+                    </a>
+                </div>
+
+                <!-- Center Navigation (by role) -->
+                <div class="hidden md:flex items-center space-x-8">
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'admin' %}
+                            <a href="/dashboard/admin/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
+                            <a href="/api/v1/users/" class="text-gray-700 hover:text-edu-primary transition">Usuarios</a>
+                            <a href="/api/docs/" class="text-gray-700 hover:text-edu-primary transition">API</a>
+                        {% elif user.role == 'director' %}
+                            <a href="/dashboard/director/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
+                            <a href="/api/v1/courses/" class="text-gray-700 hover:text-edu-primary transition">Cursos</a>
+                        {% elif user.role == 'docente' %}
+                            <a href="/dashboard/docente/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
+                            <a href="/api/v1/enrollments/" class="text-gray-700 hover:text-edu-primary transition">Estudiantes</a>
+                        {% elif user.role == 'estudiante' %}
+                            <a href="/dashboard/estudiante/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
+                            <a href="/api/v1/grades/" class="text-gray-700 hover:text-edu-primary transition">Calificaciones</a>
+                        {% elif user.role == 'padre' %}
+                            <a href="/dashboard/padre/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <div class="hidden sm:flex items-center space-x-3">
+                            <div class="text-right">
+                                <p class="text-sm font-medium text-gray-900">{{ user.get_full_name }}</p>
+                                <p class="text-xs text-gray-500">{{ user.get_role_display }}</p>
+                            </div>
+                            <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ user.email }}{% endif %}"
+                                 alt="Profile" class="w-10 h-10 rounded-full">
+                        </div>
+                        <form method="post" action="/logout/" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-edu-primary rounded-lg hover:bg-blue-700 transition">
+                                Salir
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="/login/" class="px-4 py-2 text-sm font-medium text-edu-primary border border-edu-primary rounded-lg hover:bg-blue-50 transition">
+                            Login
+                        </a>
+                        <a href="/register/" class="px-4 py-2 text-sm font-medium text-white bg-edu-primary rounded-lg hover:bg-blue-700 transition">
+                            Registrarse
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto mt-4 px-4 sm:px-6 lg:px-8">
+            {% for message in messages %}
+                <div class="rounded-lg p-4 mb-4 {% if message.tags %}bg-{{ message.tags }}-100 text-{{ message.tags }}-800{% else %}bg-green-100 text-green-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {% block content %}
+            <!-- Content goes here -->
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-500 text-sm">
+                <p>&copy; 2026 Plataforma Educativa. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
