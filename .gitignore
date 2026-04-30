@@ -27,7 +27,7 @@ db.sqlite3-journal
 # Media and Static files
 media/
 staticfiles/
-/static/
+# /static/ → NO ignorar: es la carpeta de archivos estáticos fuente
 
 # Logs
 *.log
