@@ -20,7 +20,6 @@ class InstitutionAdmin(admin.ModelAdmin):
     list_filter = ('is_active', 'created_at')
     search_fields = ('name', 'slug', 'email')
     prepopulated_fields = {'slug': ('name',)}
-    filter_horizontal = ('admin_users',)
 
 
 @admin.register(AcademicYear)

@@ -20,7 +20,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
 
 @admin.register(Grade)
 class GradeAdmin(admin.ModelAdmin):
-    list_display = ('enrollment', 'evaluation_name', 'evaluation_type', 'score', 'percentage')
+    list_display = ('enrollment', 'evaluation_name', 'evaluation_type', 'score')
     list_filter = ('evaluation_type', 'recorded_date')
     search_fields = ('enrollment__student__email', 'evaluation_name')
     readonly_fields = ('recorded_date',)
