@@ -98,8 +98,7 @@ if 'DATABASE_URL' in os.environ:
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
+            conn_max_age=0,  # Nueva conexión por request (más estable en Railway)
         )
     }
 else:
@@ -170,6 +169,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Auth URLs
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 # Internationalization
 LANGUAGE_CODE = 'es-co'
