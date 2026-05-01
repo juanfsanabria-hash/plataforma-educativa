@@ -29,6 +29,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-i177i#bjm@^tb@%k5geqh
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS += ['healthcheck.railway.app']
 
 
 # Application definition
