@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python manage.py collectstatic --noinput --clear
+RUN DEBUG=False SECRET_KEY=build-only python manage.py collectstatic --noinput --clear
 
 EXPOSE 8000
 
