@@ -103,6 +103,12 @@ class Institution(models.Model):
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True)
     website = models.URLField(blank=True)
+    admin_users = models.ManyToManyField(
+        'accounts.CustomUser',
+        related_name='admin_institutions',
+        blank=True,
+        limit_choices_to={'role__in': ['admin', 'director']},
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

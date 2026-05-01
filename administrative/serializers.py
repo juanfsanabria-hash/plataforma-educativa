@@ -10,7 +10,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         model = StudentProfile
         fields = ('id', 'user', 'student_name', 'institution', 'institution_name',
                   'academic_year', 'date_of_birth', 'gender', 'address',
-                  'emergency_contact', 'emergency_phone', 'parent_names',
+                  'emergency_contact', 'emergency_phone', 'parent', 'parent_names',
                   'enrollment_status', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
 

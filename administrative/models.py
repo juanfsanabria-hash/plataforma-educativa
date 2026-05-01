@@ -19,6 +19,14 @@ class StudentProfile(models.Model):
     address = models.CharField(max_length=500, blank=True)
     emergency_contact = models.CharField(max_length=255, blank=True)
     emergency_phone = models.CharField(max_length=20, blank=True)
+    parent = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='children_profiles',
+        limit_choices_to={'role': 'padre'},
+    )
     parent_names = models.TextField(blank=True)
     enrollment_status = models.CharField(max_length=20, choices=[
         ('active', _('Activo')),

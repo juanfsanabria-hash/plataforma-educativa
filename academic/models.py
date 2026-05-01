@@ -69,7 +69,7 @@ class Grade(models.Model):
         ('participation', _('Participación')),
         ('other', _('Otro')),
     ])
-    score = models.DecimalField(max_digits=5, decimal_places=2)
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     max_score = models.DecimalField(max_digits=5, decimal_places=2, default=100)
     weight = models.DecimalField(max_digits=5, decimal_places=2, default=1)
     recorded_date = models.DateField(auto_now_add=True)
@@ -79,6 +79,11 @@ class Grade(models.Model):
         verbose_name = _('Calificación')
         verbose_name_plural = _('Calificaciones')
         ordering = ['recorded_date']
+
+    def percentage(self):
+        if self.max_score and self.max_score > 0:
+            return round(float(self.score / self.max_score) * 100, 2)
+        return 0
 
     def __str__(self):
         return f"{self.enrollment.student.get_full_name()} - {self.evaluation_name}: {self.score}"
