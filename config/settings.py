@@ -30,6 +30,10 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
 ALLOWED_HOSTS += ['healthcheck.railway.app']
+# Railway injects RAILWAY_PUBLIC_DOMAIN automatically (e.g. myapp-production-xxx.up.railway.app)
+_railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if _railway_domain:
+    ALLOWED_HOSTS.append(_railway_domain)
 
 
 # Application definition
