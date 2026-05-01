@@ -216,6 +216,8 @@ if not DEBUG:
     # Trust Railway's proxy SSL header to avoid redirect loops
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
+    # Railway sends health checks via plain HTTP to the container port — exempt from redirect
+    SECURE_REDIRECT_EXEMPT = [r'^health/$']
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
