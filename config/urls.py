@@ -21,6 +21,7 @@ from core.views import (
     docente_dashboard,
     estudiante_dashboard,
     padre_dashboard,
+    health_check,
 )
 
 # API Router
@@ -47,6 +48,9 @@ router.register(r'messages', MessageViewSet, basename='message')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
+    # Health check (no auth, no DB)
+    path('health/', health_check, name='health-check'),
+
     # Authentication views (HTML)
     path('login/', login_view, name='login'),
     path('register/', register_view, name='register'),

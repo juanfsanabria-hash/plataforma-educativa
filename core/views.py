@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 from django.contrib import messages
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import Count, Avg, Q
 from django.views.decorators.http import require_http_methods
 from accounts.models import CustomUser, Institution
@@ -291,3 +291,7 @@ def calculate_student_attendance(student):
     total = attendances.count()
     present = attendances.filter(status='present').count()
     return round((present / total) * 100, 1)
+
+
+def health_check(request):
+    return JsonResponse({'status': 'ok'})
