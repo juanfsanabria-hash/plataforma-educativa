@@ -27,6 +27,8 @@ from core.views import (
     event_detail,
     course_detail,
     topic_detail,
+    topic_create,
+    topic_edit,
 )
 
 # API Router
@@ -84,6 +86,10 @@ urlpatterns = [
 
     # Topic detail view
     path('temas/<int:topic_id>/', topic_detail, name='topic-detail'),
+
+    # Topic create/edit views
+    path('cursos/<int:course_id>/temas/nuevo/', topic_create, name='topic-create'),
+    path('temas/<int:topic_id>/editar/', topic_edit, name='topic-edit'),
 
     # REST API endpoints
     path('api/v1/', include(router.urls)),

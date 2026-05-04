@@ -379,6 +379,56 @@ def course_detail(request, course_id):
     })
 
 
+class TopicForm(django_forms.ModelForm):
+    class Meta:
+        model = Topic
+        fields = ['title', 'description', 'order', 'date', 'is_published']
+        widgets = {
+            'description': django_forms.Textarea(attrs={'rows': 4}),
+            'date': django_forms.DateInput(attrs={'type': 'date'}),
+        }
+
+
+@login_required
+def topic_create(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    if course.teacher != request.user:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        form = TopicForm(request.POST)
+        if form.is_valid():
+            topic = form.save(commit=False)
+            topic.course = course
+            topic.save()
+            return redirect('course-detail', course_id=course.id)
+    else:
+        form = TopicForm()
+
+    return render(request, 'academic/topic_form.html', {
+        'form': form, 'course': course, 'action': 'Crear tema',
+    })
+
+
+@login_required
+def topic_edit(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    if topic.course.teacher != request.user:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        form = TopicForm(request.POST, instance=topic)
+        if form.is_valid():
+            form.save()
+            return redirect('topic-detail', topic_id=topic.id)
+    else:
+        form = TopicForm(instance=topic)
+
+    return render(request, 'academic/topic_form.html', {
+        'form': form, 'course': topic.course, 'topic': topic, 'action': 'Editar tema',
+    })
+
+
 @login_required
 def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)

@@ -182,3 +182,45 @@ class TopicDetailViewTest(TestCase):
         response = self.client.get(f'/temas/{self.topic_pub.id}/')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Doc PDF')
+
+
+class TopicCreateEditViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = make_teacher('teacher4')
+        self.other_teacher = make_teacher('teacher5')
+        self.inst = make_institution()
+        self.year = make_academic_year(self.inst)
+        self.course = make_course(self.inst, self.year, self.teacher)
+
+    def test_teacher_can_create_topic(self):
+        self.client.login(username='teacher4', password='pass123')
+        response = self.client.post(f'/cursos/{self.course.id}/temas/nuevo/', {
+            'title': 'Nuevo tema',
+            'description': 'Desc',
+            'order': 1,
+            'is_published': False,
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Topic.objects.filter(course=self.course, title='Nuevo tema').exists())
+
+    def test_other_teacher_cannot_create(self):
+        self.client.login(username='teacher5', password='pass123')
+        response = self.client.post(f'/cursos/{self.course.id}/temas/nuevo/', {
+            'title': 'Hack', 'order': 1,
+        })
+        self.assertEqual(response.status_code, 403)
+
+    def test_teacher_can_edit_topic(self):
+        topic = Topic.objects.create(course=self.course, title='Original', order=1)
+        self.client.login(username='teacher4', password='pass123')
+        response = self.client.post(f'/temas/{topic.id}/editar/', {
+            'title': 'Editado',
+            'description': '',
+            'order': 1,
+            'is_published': True,
+        })
+        self.assertEqual(response.status_code, 302)
+        topic.refresh_from_db()
+        self.assertEqual(topic.title, 'Editado')
+        self.assertTrue(topic.is_published)
