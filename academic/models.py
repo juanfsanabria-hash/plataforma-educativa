@@ -114,3 +114,46 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.enrollment.student.get_full_name()} - {self.date}"
+
+
+class Topic(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='topics')
+    title = models.CharField(max_length=255, verbose_name=_('Título'))
+    description = models.TextField(blank=True, verbose_name=_('Descripción'))
+    order = models.PositiveIntegerField(default=0, verbose_name=_('Orden'))
+    date = models.DateField(null=True, blank=True, verbose_name=_('Fecha'))
+    is_published = models.BooleanField(default=False, verbose_name=_('Publicado'))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Tema')
+        verbose_name_plural = _('Temas')
+        ordering = ['order', 'date']
+
+    def __str__(self):
+        return f"{self.course.name} — {self.order}. {self.title}"
+
+
+class TopicMaterial(models.Model):
+    MATERIAL_TYPES = [
+        ('file', _('Archivo')),
+        ('link', _('Enlace')),
+    ]
+
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='materials')
+    title = models.CharField(max_length=255, verbose_name=_('Título'))
+    material_type = models.CharField(max_length=10, choices=MATERIAL_TYPES)
+    file = models.FileField(
+        upload_to='materials/%Y/%m/', null=True, blank=True, verbose_name=_('Archivo')
+    )
+    url = models.URLField(blank=True, verbose_name=_('URL'))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Material')
+        verbose_name_plural = _('Materiales')
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.topic.title} — {self.title}"
