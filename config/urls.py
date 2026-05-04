@@ -2,8 +2,8 @@
 URL configuration for config project.
 API endpoints for Plataforma Educativa
 """
-from django.contrib import admin
 from django.urls import path, include
+from accounts.admin import secure_admin
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as authtoken_views
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
@@ -65,7 +65,7 @@ urlpatterns = [
     path('dashboard/padre/', padre_dashboard, name='padre-dashboard'),
 
     # Admin interface
-    path('admin/', admin.site.urls),
+    path('admin/', secure_admin.urls),
 
     # REST API endpoints
     path('api/v1/', include(router.urls)),

@@ -1,20 +1,20 @@
 from django.contrib import admin
+from django.contrib.admin import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Institution, AcademicYear
 
-from django.contrib.admin import AdminSite as _AdminSite
 
+class SecureAdminSite(AdminSite):
+    site_header = "Plataforma Educativa — Admin"
+    site_title = "Admin"
 
-class _SecureAdminSite(_AdminSite):
     def has_permission(self, request):
         return request.user.is_active and request.user.is_superuser
 
 
-from django.contrib import admin as _admin_module
-_admin_module.site.__class__ = _SecureAdminSite
+secure_admin = SecureAdminSite(name='secure_admin')
 
 
-@admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         ('Educational Info', {'fields': ('role', 'cedula', 'phone', 'profile_photo', 'bio')}),
@@ -25,7 +25,6 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('-created_at',)
 
 
-@admin.register(Institution)
 class InstitutionAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'email', 'phone', 'is_active', 'created_at')
     list_filter = ('is_active', 'created_at')
@@ -33,9 +32,13 @@ class InstitutionAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
-@admin.register(AcademicYear)
 class AcademicYearAdmin(admin.ModelAdmin):
     list_display = ('name', 'institution', 'year', 'start_date', 'end_date', 'is_active')
     list_filter = ('institution', 'is_active', 'start_date')
     search_fields = ('name', 'institution__name')
     readonly_fields = ('created_at',)
+
+
+secure_admin.register(CustomUser, CustomUserAdmin)
+secure_admin.register(Institution, InstitutionAdmin)
+secure_admin.register(AcademicYear, AcademicYearAdmin)
