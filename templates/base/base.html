@@ -49,19 +49,23 @@
                     {% if user.is_authenticated %}
                         {% if user.role == 'admin' %}
                             <a href="/dashboard/admin/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
-                            <a href="/api/v1/users/" class="text-gray-700 hover:text-edu-primary transition">Usuarios</a>
-                            <a href="/api/docs/" class="text-gray-700 hover:text-edu-primary transition">API</a>
+                            <a href="/admin/" class="text-gray-700 hover:text-edu-primary transition">Admin</a>
+                            <a href="/api/docs/" class="text-gray-700 hover:text-edu-primary transition">API Docs</a>
                         {% elif user.role == 'director' %}
                             <a href="/dashboard/director/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
                             <a href="/api/v1/courses/" class="text-gray-700 hover:text-edu-primary transition">Cursos</a>
+                            <a href="/api/v1/users/" class="text-gray-700 hover:text-edu-primary transition">Usuarios</a>
                         {% elif user.role == 'docente' %}
                             <a href="/dashboard/docente/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
-                            <a href="/api/v1/enrollments/" class="text-gray-700 hover:text-edu-primary transition">Estudiantes</a>
+                            <a href="/api/v1/courses/" class="text-gray-700 hover:text-edu-primary transition">Mis Cursos</a>
+                            <a href="/api/v1/grades/" class="text-gray-700 hover:text-edu-primary transition">Calificaciones</a>
                         {% elif user.role == 'estudiante' %}
                             <a href="/dashboard/estudiante/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
+                            <a href="/api/v1/enrollments/" class="text-gray-700 hover:text-edu-primary transition">Mis Cursos</a>
                             <a href="/api/v1/grades/" class="text-gray-700 hover:text-edu-primary transition">Calificaciones</a>
                         {% elif user.role == 'padre' %}
                             <a href="/dashboard/padre/" class="text-gray-700 hover:text-edu-primary transition">Dashboard</a>
+                            <a href="/api/v1/student-profiles/" class="text-gray-700 hover:text-edu-primary transition">Mis Hijos</a>
                         {% endif %}
                     {% endif %}
                 </div>
