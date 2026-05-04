@@ -1,8 +1,22 @@
+import sys
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from accounts.models import Institution, AcademicYear
 from academic.models import Course, Topic, TopicMaterial
+
+# Python 3.14 + Django 5.0 compatibility: copy(super()) is broken in Py3.14.
+# Patch BaseContext.__copy__ to use object.__new__ instead.
+if sys.version_info >= (3, 14):
+    from django.template.context import BaseContext
+
+    def _base_context_copy(self):
+        duplicate = object.__new__(type(self))
+        duplicate.__dict__.update(self.__dict__)
+        duplicate.dicts = self.dicts[:]
+        return duplicate
+
+    BaseContext.__copy__ = _base_context_copy
 
 User = get_user_model()
 
@@ -81,3 +95,47 @@ class TopicModelTest(TestCase):
         mat = TopicMaterial(topic=topic, title='Sin URL', material_type='link')
         with self.assertRaises(ValidationError):
             mat.full_clean()
+
+
+class CourseDetailViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = make_teacher('teacher2')
+        self.student = User.objects.create_user(
+            username='student1', email='student1@test.com',
+            password='pass123', role='estudiante',
+            first_name='Ana', last_name='S',
+        )
+        self.inst = make_institution()
+        self.year = make_academic_year(self.inst)
+        self.course = make_course(self.inst, self.year, self.teacher)
+        from academic.models import Enrollment
+        Enrollment.objects.create(course=self.course, student=self.student)
+        Topic.objects.create(course=self.course, title='Tema 1', order=1, is_published=True)
+        Topic.objects.create(course=self.course, title='Tema borrador', order=2, is_published=False)
+
+    def test_teacher_sees_all_topics(self):
+        self.client.login(username='teacher2', password='pass123')
+        response = self.client.get(f'/cursos/{self.course.id}/')
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn('Tema 1', content)
+        self.assertIn('Tema borrador', content)
+
+    def test_student_sees_only_published(self):
+        self.client.login(username='student1', password='pass123')
+        response = self.client.get(f'/cursos/{self.course.id}/')
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn('Tema 1', content)
+        self.assertNotIn('Tema borrador', content)
+
+    def test_unenrolled_student_gets_403(self):
+        other_student = User.objects.create_user(
+            username='student2', email='student2@test.com',
+            password='pass123', role='estudiante',
+            first_name='Pedro', last_name='O',
+        )
+        self.client.login(username='student2', password='pass123')
+        response = self.client.get(f'/cursos/{self.course.id}/')
+        self.assertEqual(response.status_code, 403)

@@ -10,7 +10,7 @@ from django.views.decorators.http import require_http_methods
 from django import forms as django_forms
 from accounts.models import CustomUser, Institution
 from accounts.forms import LoginForm, RegisterForm
-from academic.models import Course, Enrollment, Grade, Attendance
+from academic.models import Course, Enrollment, Grade, Attendance, Topic, TopicMaterial
 from administrative.models import Payment, StudentProfile
 from .models import ScheduleEvent
 
@@ -358,6 +358,24 @@ def events_json(request):
 def event_detail(request, event_id):
     event = get_object_or_404(ScheduleEvent, id=event_id)
     return render(request, 'calendar/event_detail.html', {'event': event})
+
+
+@login_required
+def course_detail(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    user = request.user
+    is_teacher = (course.teacher == user)
+    is_enrolled = Enrollment.objects.filter(course=course, student=user, status='active').exists()
+
+    if not is_teacher and not is_enrolled:
+        return HttpResponseForbidden()
+
+    topics = course.topics.all() if is_teacher else course.topics.filter(is_published=True)
+    return render(request, 'academic/course_detail.html', {
+        'course': course,
+        'topics': topics,
+        'is_teacher': is_teacher,
+    })
 
 
 def health_check(request):

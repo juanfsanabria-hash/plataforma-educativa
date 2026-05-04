@@ -1,0 +1,70 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ course.name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-sm text-gray-500 mb-1">
+        <a href="javascript:history.back()" class="hover:text-edu-primary">← Volver</a>
+      </p>
+      <h1 class="text-2xl font-bold text-gray-900">{{ course.name }}</h1>
+      <p class="text-gray-500 text-sm mt-1">
+        {{ course.teacher.get_full_name }} · {{ course.academic_year.name }}
+      </p>
+    </div>
+    {% if is_teacher %}
+    <a href="/cursos/{{ course.id }}/temas/nuevo/"
+       class="px-4 py-2 bg-edu-primary text-white text-sm rounded-lg hover:bg-edu-secondary transition">
+      + Nuevo tema
+    </a>
+    {% endif %}
+  </div>
+
+  {% if topics %}
+  <div class="space-y-3">
+    {% for topic in topics %}
+    <a href="/temas/{{ topic.id }}/"
+       class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition group">
+      <div class="flex items-center space-x-4">
+        <div class="w-9 h-9 rounded-lg bg-edu-primary bg-opacity-10 flex items-center justify-center text-edu-primary font-bold text-sm">
+          {{ topic.order }}
+        </div>
+        <div>
+          <p class="font-semibold text-gray-900 group-hover:text-edu-primary">{{ topic.title }}</p>
+          {% if topic.date %}
+          <p class="text-xs text-gray-400">{{ topic.date|date:"d/m/Y" }}</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="text-xs text-gray-400">
+          {{ topic.materials.count }} material{% if topic.materials.count != 1 %}es{% endif %}
+        </span>
+        {% if is_teacher and not topic.is_published %}
+        <span class="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded-full">Borrador</span>
+        {% endif %}
+        {% if is_teacher %}
+        <a href="/temas/{{ topic.id }}/editar/"
+           class="text-xs text-gray-400 hover:text-edu-primary px-2 py-1 rounded"
+           onclick="event.stopPropagation()">Editar</a>
+        {% endif %}
+        <span class="text-gray-300 group-hover:text-edu-primary">→</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-200">
+    <p class="text-gray-400">
+      {% if is_teacher %}
+      No hay temas todavía.
+      <a href="/cursos/{{ course.id }}/temas/nuevo/" class="text-edu-primary hover:underline">Crea el primero</a>.
+      {% else %}
+      Aún no hay contenido publicado para este curso.
+      {% endif %}
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
