@@ -2,6 +2,8 @@
 URL configuration for config project.
 API endpoints for Plataforma Educativa
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path, include
 from accounts.admin import secure_admin
 from rest_framework.routers import DefaultRouter
@@ -29,6 +31,7 @@ from core.views import (
     topic_detail,
     topic_create,
     topic_edit,
+    material_upload,
 )
 
 # API Router
@@ -91,6 +94,9 @@ urlpatterns = [
     path('cursos/<int:course_id>/temas/nuevo/', topic_create, name='topic-create'),
     path('temas/<int:topic_id>/editar/', topic_edit, name='topic-edit'),
 
+    # Material upload view
+    path('temas/<int:topic_id>/materiales/subir/', material_upload, name='material-upload'),
+
     # REST API endpoints
     path('api/v1/', include(router.urls)),
     path('api/v1/auth/', include('rest_framework.urls')),
@@ -101,3 +107,6 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

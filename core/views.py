@@ -379,6 +379,36 @@ def course_detail(request, course_id):
     })
 
 
+class MaterialForm(django_forms.ModelForm):
+    class Meta:
+        model = TopicMaterial
+        fields = ['title', 'material_type', 'file', 'url']
+        widgets = {
+            'url': django_forms.URLInput(attrs={'placeholder': 'https://...'}),
+        }
+
+
+@login_required
+def material_upload(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    if topic.course.teacher != request.user:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        form = MaterialForm(request.POST, request.FILES)
+        if form.is_valid():
+            mat = form.save(commit=False)
+            mat.topic = topic
+            mat.save()
+            return redirect('topic-detail', topic_id=topic.id)
+    else:
+        form = MaterialForm()
+
+    return render(request, 'academic/material_upload.html', {
+        'form': form, 'topic': topic,
+    })
+
+
 class TopicForm(django_forms.ModelForm):
     class Meta:
         model = Topic

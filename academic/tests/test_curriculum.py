@@ -224,3 +224,39 @@ class TopicCreateEditViewTest(TestCase):
         topic.refresh_from_db()
         self.assertEqual(topic.title, 'Editado')
         self.assertTrue(topic.is_published)
+
+
+class MaterialUploadViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = make_teacher('teacher6')
+        self.inst = make_institution()
+        self.year = make_academic_year(self.inst)
+        self.course = make_course(self.inst, self.year, self.teacher)
+        self.topic = Topic.objects.create(
+            course=self.course, title='Tema con materiales', order=1, is_published=True,
+        )
+
+    def test_teacher_can_add_link_material(self):
+        self.client.login(username='teacher6', password='pass123')
+        response = self.client.post(f'/temas/{self.topic.id}/materiales/subir/', {
+            'title': 'Video YouTube',
+            'material_type': 'link',
+            'url': 'https://youtube.com/watch?v=abc123',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            TopicMaterial.objects.filter(topic=self.topic, title='Video YouTube').exists()
+        )
+
+    def test_non_teacher_cannot_upload(self):
+        student = User.objects.create_user(
+            username='student6', email='student6@test.com',
+            password='pass123', role='estudiante',
+            first_name='X', last_name='Y',
+        )
+        self.client.login(username='student6', password='pass123')
+        response = self.client.post(f'/temas/{self.topic.id}/materiales/subir/', {
+            'title': 'Hack', 'material_type': 'link', 'url': 'https://bad.com',
+        })
+        self.assertEqual(response.status_code, 403)
