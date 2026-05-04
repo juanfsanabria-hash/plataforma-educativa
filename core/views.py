@@ -390,7 +390,7 @@ class MaterialForm(django_forms.ModelForm):
 
 @login_required
 def material_upload(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
+    topic = get_object_or_404(Topic.objects.select_related('course', 'course__teacher'), id=topic_id)
     if topic.course.teacher != request.user:
         return HttpResponseForbidden()
 
@@ -442,7 +442,7 @@ def topic_create(request, course_id):
 
 @login_required
 def topic_edit(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
+    topic = get_object_or_404(Topic.objects.select_related('course', 'course__teacher'), id=topic_id)
     if topic.course.teacher != request.user:
         return HttpResponseForbidden()
 
@@ -461,7 +461,7 @@ def topic_edit(request, topic_id):
 
 @login_required
 def topic_detail(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
+    topic = get_object_or_404(Topic.objects.select_related('course', 'course__teacher'), id=topic_id)
     course = topic.course
     user = request.user
     is_teacher = (course.teacher == user)
