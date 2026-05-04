@@ -2,6 +2,17 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Institution, AcademicYear
 
+from django.contrib.admin import AdminSite as _AdminSite
+
+
+class _SecureAdminSite(_AdminSite):
+    def has_permission(self, request):
+        return request.user.is_active and request.user.is_superuser
+
+
+from django.contrib import admin as _admin_module
+_admin_module.site.__class__ = _SecureAdminSite
+
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
