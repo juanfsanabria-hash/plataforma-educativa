@@ -42,7 +42,7 @@
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Mis Cursos</h2>
     <div class="grid md:grid-cols-2 gap-4">
       {% for course in courses %}
-      <a href="/api/v1/courses/{{ course.id }}/"
+      <a href="/cursos/{{ course.id }}/"
          class="flex items-center space-x-4 p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition group">
         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-edu-primary flex items-center justify-center text-white font-bold text-lg">
           {{ course.name|first }}
