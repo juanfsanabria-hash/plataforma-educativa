@@ -22,6 +22,7 @@ from core.views import (
     estudiante_dashboard,
     padre_dashboard,
     health_check,
+    profile_view,
 )
 
 # API Router
@@ -55,6 +56,7 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('register/', register_view, name='register'),
     path('logout/', logout_view, name='logout'),
+    path('perfil/', profile_view, name='profile'),
 
     # Dashboard views (HTML)
     path('', home, name='home'),

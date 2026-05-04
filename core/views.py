@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import Count, Avg, Q
 from django.views.decorators.http import require_http_methods
+from django import forms as django_forms
 from accounts.models import CustomUser, Institution
 from accounts.forms import LoginForm, RegisterForm
 from academic.models import Course, Enrollment, Grade, Attendance
@@ -291,6 +292,29 @@ def calculate_student_attendance(student):
     total = attendances.count()
     present = attendances.filter(status='present').count()
     return round((present / total) * 100, 1)
+
+
+class ProfileUpdateForm(django_forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'phone', 'bio', 'profile_photo', 'cedula']
+        widgets = {
+            'bio': django_forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def profile_view(request):
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Perfil actualizado correctamente.')
+            return redirect('profile')
+    else:
+        form = ProfileUpdateForm(instance=request.user)
+    return render(request, 'profile/profile.html', {'form': form})
 
 
 def health_check(request):
