@@ -1,0 +1,50 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div class="h-3" style="background-color: {{ event.color }}"></div>
+        <div class="p-8">
+            <div class="flex items-start justify-between mb-6">
+                <div>
+                    <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full text-white mb-3"
+                          style="background-color: {{ event.color }}">
+                        {{ event.get_event_type_display }}
+                    </span>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ event.title }}</h1>
+                </div>
+                <a href="javascript:history.back()" class="text-gray-400 hover:text-gray-600 text-2xl">&larr;</a>
+            </div>
+            <div class="space-y-4 text-gray-600">
+                <div class="flex items-center space-x-3">
+                    <span class="text-xl">🗓</span>
+                    <div>
+                        <p class="font-medium text-gray-900">{{ event.start|date:"l, d \d\e F \d\e Y" }}</p>
+                        {% if not event.all_day %}
+                            <p class="text-sm">{{ event.start|time:"H:i" }} – {{ event.end|time:"H:i" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if event.description %}
+                <div class="flex items-start space-x-3">
+                    <span class="text-xl">📝</span>
+                    <p>{{ event.description }}</p>
+                </div>
+                {% endif %}
+                <div class="flex items-center space-x-3">
+                    <span class="text-xl">👤</span>
+                    <p>Creado por: <span class="font-medium">{{ event.created_by.get_full_name }}</span></p>
+                </div>
+            </div>
+            {% if event.url %}
+            <div class="mt-8">
+                <a href="{{ event.url }}"
+                   class="block w-full text-center py-3 bg-edu-primary text-white font-semibold rounded-xl hover:bg-blue-700 transition">
+                    Ver detalle completo →
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
