@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from accounts.models import CustomUser, Institution, AcademicYear
@@ -156,7 +157,6 @@ class TopicMaterial(models.Model):
         ordering = ['created_at']
 
     def clean(self):
-        from django.core.exceptions import ValidationError
         if self.material_type == 'file' and not self.file:
             raise ValidationError({'file': 'Se requiere un archivo para materiales de tipo "Archivo".'})
         if self.material_type == 'link' and not self.url:
