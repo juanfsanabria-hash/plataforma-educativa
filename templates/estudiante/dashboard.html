@@ -1,219 +1,99 @@
 {% extends 'base/base.html' %}
+{% block title %}Dashboard Estudiante{% endblock %}
 
-{% block title %}Dashboard Estudiante - Plataforma Educativa{% endblock %}
+{% block extra_css %}
+<style>
+  .fc-event { cursor: pointer; border-radius: 6px; font-size: 0.82rem; }
+  .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <!-- Page Header -->
-    <div class="sm:flex sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">Mi Progreso Académico</h1>
-            <p class="mt-2 text-gray-600">Visualiza tu desempeño y calificaciones</p>
-        </div>
-        <div class="mt-4 sm:mt-0">
-            <button onclick="location.href='/perfil/'" class="px-4 py-2 bg-edu-primary text-white rounded-lg hover:bg-blue-700 transition">
-                Ver Mi Perfil
-            </button>
-        </div>
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Hola, {{ user.first_name }} 👋</h1>
+      <p class="text-gray-500 text-sm mt-1">Tu agenda académica</p>
     </div>
+    <a href="/perfil/" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition">Mi perfil</a>
+  </div>
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- GPA -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-primary">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Mi GPA Actual</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ gpa }}/10.0</p>
-                    <p class="mt-2 text-xs text-gray-500">
-                        {% if gpa >= 8 %}
-                        Excelente desempeño 🌟
-                        {% elif gpa >= 7 %}
-                        Buen desempeño ✓
-                        {% elif gpa >= 6 %}
-                        Desempeño aceptable →
-                        {% else %}
-                        Requiere mejora ⚠️
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="text-4xl">📊</div>
-            </div>
-        </div>
-
-        <!-- Asistencia -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-secondary">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Asistencia</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ attendance_rate }}%</p>
-                    <p class="mt-2 text-xs text-gray-500">
-                        {% if attendance_rate >= 95 %}
-                        Asistencia perfecta ✅
-                        {% elif attendance_rate >= 80 %}
-                        Buena asistencia ✓
-                        {% else %}
-                        Requiere mejora ⚠️
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="text-4xl">📋</div>
-            </div>
-        </div>
-
-        <!-- Mis Cursos -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-accent">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Mis Cursos</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ enrollments.count }}</p>
-                    <p class="mt-2 text-xs text-gray-500">Inscritos actualmente</p>
-                </div>
-                <div class="text-4xl">📚</div>
-            </div>
-        </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Cursos</p>
+      <p class="text-2xl font-bold text-edu-primary mt-1">{{ enrollments.count }}</p>
     </div>
-
-    <!-- Mis Cursos y Calificaciones -->
-    {% if enrollments %}
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-6">Mis Cursos Este Período</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% for enrollment in enrollments %}
-            <div class="border border-gray-200 rounded-lg p-4">
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <h4 class="font-bold text-gray-900">{{ enrollment.course.name }}</h4>
-                        <p class="text-sm text-gray-600">Profesor: {{ enrollment.course.teacher.get_full_name }}</p>
-                    </div>
-                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">Activo</span>
-                </div>
-
-                <!-- Calificaciones por asignatura -->
-                <div class="mt-4">
-                    {% with enrollment.grade_set.all as grades %}
-                    {% if grades %}
-                        <div class="space-y-2">
-                            {% for grade in grades %}
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-700">{{ grade.evaluation_name }}</span>
-                                <span class="font-bold text-gray-900">{{ grade.score }}/{{ grade.max_score }}</span>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% with grades|length as count %}
-                        <div class="mt-3 pt-3 border-t border-gray-200">
-                            <p class="text-sm text-gray-600">Promedio en {{ enrollment.course.name }}: <span class="font-bold">8.5</span></p>
-                        </div>
-                        {% endwith %}
-                    {% else %}
-                    <p class="text-sm text-gray-500">Sin calificaciones aún</p>
-                    {% endif %}
-                    {% endwith %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Promedio</p>
+      <p class="text-2xl font-bold text-green-600 mt-1">{{ gpa|default:"—" }}</p>
     </div>
-    {% else %}
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-        <p class="text-yellow-900">No estás inscrito en ningún curso actualmente.</p>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Asistencia</p>
+      <p class="text-2xl font-bold text-purple-600 mt-1">{{ attendance_rate }}%</p>
     </div>
-    {% endif %}
-
-    <!-- Acciones Rápidas y Recursos -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Acciones Rápidas -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Acciones Rápidas</h3>
-            <div class="space-y-3">
-                <button class="w-full text-left flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📧</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Contactar Docentes</p>
-                        <p class="text-sm text-gray-500">Enviar mensajes a tus profesores</p>
-                    </div>
-                </button>
-
-                <button class="w-full text-left flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📝</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Ver Tareas</p>
-                        <p class="text-sm text-gray-500">Tareas pendientes y entregas</p>
-                    </div>
-                </button>
-
-                <button class="w-full text-left flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📚</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Recursos Educativos</p>
-                        <p class="text-sm text-gray-500">Apuntes y materiales de clase</p>
-                    </div>
-                </button>
-
-                <button class="w-full text-left flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">🏆</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Mis Logros</p>
-                        <p class="text-sm text-gray-500">Insignias y certificados obtenidos</p>
-                    </div>
-                </button>
-            </div>
-        </div>
-
-        <!-- Información Importante -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Información Importante</h3>
-            <div class="space-y-3">
-                <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div class="flex items-start">
-                        <span class="text-2xl mr-3">✅</span>
-                        <div class="flex-1">
-                            <p class="font-medium text-green-900">Pagos al Día</p>
-                            <p class="text-sm text-green-700">Tu matrícula está completamente pagada</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div class="flex items-start">
-                        <span class="text-2xl mr-3">📅</span>
-                        <div class="flex-1">
-                            <p class="font-medium text-blue-900">Próximas Evaluaciones</p>
-                            <p class="text-sm text-blue-700">Examen de Matemáticas - 5 de mayo</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                    <div class="flex items-start">
-                        <span class="text-2xl mr-3">🎓</span>
-                        <div class="flex-1">
-                            <p class="font-medium text-purple-900">Certificación Disponible</p>
-                            <p class="text-sm text-purple-700">Descarga tu certificado del período anterior</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Pendientes</p>
+      <p class="text-2xl font-bold text-orange-500 mt-1">{{ pending_tasks }}</p>
     </div>
+  </div>
 
-    <!-- Gráfica de Progreso (simulada) -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-6">Tu Progreso Este Período</h3>
-        <div class="space-y-4">
-            {% for subject in "ABCDE" %}
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <p class="text-sm font-medium text-gray-700">Asignatura {{ subject }}</p>
-                    <span class="text-sm font-bold text-gray-900">8.2/10.0</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-gradient-to-r from-edu-primary to-edu-secondary h-2 rounded-full" style="width: 82%"></div>
-                </div>
-            </div>
-            {% endfor %}
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <div id="calendar"></div>
+  </div>
+
+  {% if enrollments %}
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Mis Cursos</h2>
+    <div class="grid md:grid-cols-2 gap-4">
+      {% for enrollment in enrollments %}
+      <a href="/api/v1/courses/{{ enrollment.course.id }}/"
+         class="flex items-center space-x-4 p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition group">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-edu-primary to-edu-secondary flex items-center justify-center text-white font-bold text-lg">
+          {{ enrollment.course.name|first }}
         </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-gray-900 group-hover:text-edu-primary truncate">{{ enrollment.course.name }}</p>
+          <p class="text-sm text-gray-500">{{ enrollment.course.teacher.get_full_name }}</p>
+        </div>
+        <span class="text-gray-300 group-hover:text-edu-primary">→</span>
+      </a>
+      {% endfor %}
     </div>
+  </div>
+  {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    locale: 'es',
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left:   'prev,next today',
+      center: 'title',
+      right:  'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+    },
+    buttonText: { today:'Hoy', month:'Mes', week:'Semana', day:'Día', list:'Lista' },
+    events: '/api/events/',
+    eventClick: function(info) {
+      info.jsEvent.preventDefault();
+      if (info.event.url) window.location.href = info.event.url;
+    },
+    dateClick: function(info) {
+      calendar.changeView('timeGridDay', info.dateStr);
+    },
+    eventDidMount: function(info) {
+      if (info.event.extendedProps.description) {
+        info.el.title = info.event.extendedProps.description;
+      }
+    },
+    height: 'auto',
+    nowIndicator: true,
+  });
+  calendar.render();
+});
+</script>
 {% endblock %}
