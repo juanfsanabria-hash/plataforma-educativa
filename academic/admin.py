@@ -32,3 +32,22 @@ class AttendanceAdmin(admin.ModelAdmin):
     list_filter = ('status', 'date', 'recorded_by')
     search_fields = ('enrollment__student__email',)
     readonly_fields = ('created_at',)
+
+
+from accounts.admin import secure_admin
+from .models import Topic, TopicMaterial
+
+
+class TopicMaterialInline(admin.TabularInline):
+    model = TopicMaterial
+    extra = 1
+    fields = ['title', 'material_type', 'file', 'url']
+
+
+@admin.register(Topic, site=secure_admin)
+class TopicAdmin(admin.ModelAdmin):
+    list_display = ['course', 'order', 'title', 'date', 'is_published']
+    list_filter = ['course__institution', 'is_published']
+    list_editable = ['is_published', 'order']
+    inlines = [TopicMaterialInline]
+    ordering = ['course', 'order']
