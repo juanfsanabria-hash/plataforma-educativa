@@ -139,3 +139,46 @@ class CourseDetailViewTest(TestCase):
         self.client.login(username='student2', password='pass123')
         response = self.client.get(f'/cursos/{self.course.id}/')
         self.assertEqual(response.status_code, 403)
+
+
+class TopicDetailViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = make_teacher('teacher3')
+        self.student = User.objects.create_user(
+            username='student3', email='student3@test.com',
+            password='pass123', role='estudiante',
+            first_name='Luis', last_name='S',
+        )
+        self.inst = make_institution()
+        self.year = make_academic_year(self.inst)
+        self.course = make_course(self.inst, self.year, self.teacher)
+        from academic.models import Enrollment
+        Enrollment.objects.create(course=self.course, student=self.student, status='active')
+        self.topic_pub = Topic.objects.create(
+            course=self.course, title='Publicado', order=1,
+            is_published=True, description='Contenido del tema',
+        )
+        self.topic_draft = Topic.objects.create(
+            course=self.course, title='Borrador', order=2, is_published=False,
+        )
+        TopicMaterial.objects.create(
+            topic=self.topic_pub, title='Doc PDF',
+            material_type='link', url='https://example.com/doc.pdf',
+        )
+
+    def test_teacher_sees_draft_topic(self):
+        self.client.login(username='teacher3', password='pass123')
+        response = self.client.get(f'/temas/{self.topic_draft.id}/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_student_cannot_see_draft(self):
+        self.client.login(username='student3', password='pass123')
+        response = self.client.get(f'/temas/{self.topic_draft.id}/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_student_sees_published_with_materials(self):
+        self.client.login(username='student3', password='pass123')
+        response = self.client.get(f'/temas/{self.topic_pub.id}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Doc PDF')

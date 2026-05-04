@@ -379,5 +379,26 @@ def course_detail(request, course_id):
     })
 
 
+@login_required
+def topic_detail(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    course = topic.course
+    user = request.user
+    is_teacher = (course.teacher == user)
+    is_enrolled = Enrollment.objects.filter(course=course, student=user, status='active').exists()
+
+    if not is_teacher and not is_enrolled:
+        return HttpResponseForbidden()
+    if not is_teacher and not topic.is_published:
+        return HttpResponseForbidden()
+
+    return render(request, 'academic/topic_detail.html', {
+        'topic': topic,
+        'course': course,
+        'materials': topic.materials.all(),
+        'is_teacher': is_teacher,
+    })
+
+
 def health_check(request):
     return JsonResponse({'status': 'ok'})

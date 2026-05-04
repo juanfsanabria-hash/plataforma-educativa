@@ -26,6 +26,7 @@ from core.views import (
     events_json,
     event_detail,
     course_detail,
+    topic_detail,
 )
 
 # API Router
@@ -80,6 +81,9 @@ urlpatterns = [
 
     # Course detail view
     path('cursos/<int:course_id>/', course_detail, name='course-detail'),
+
+    # Topic detail view
+    path('temas/<int:topic_id>/', topic_detail, name='topic-detail'),
 
     # REST API endpoints
     path('api/v1/', include(router.urls)),

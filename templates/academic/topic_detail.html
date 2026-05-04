@@ -1,0 +1,75 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ topic.title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div>
+    <p class="text-sm text-gray-500 mb-1">
+      <a href="/cursos/{{ course.id }}/" class="hover:text-edu-primary">← {{ course.name }}</a>
+    </p>
+    <div class="flex items-start justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">{{ topic.order }}. {{ topic.title }}</h1>
+        {% if topic.date %}
+        <p class="text-sm text-gray-400 mt-1">{{ topic.date|date:"d \d\e F Y" }}</p>
+        {% endif %}
+      </div>
+      {% if is_teacher %}
+      <div class="flex space-x-2">
+        <a href="/temas/{{ topic.id }}/editar/"
+           class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition">Editar</a>
+        <a href="/temas/{{ topic.id }}/materiales/subir/"
+           class="px-3 py-2 text-sm bg-edu-primary text-white rounded-lg hover:bg-edu-secondary transition">+ Material</a>
+      </div>
+      {% endif %}
+    </div>
+    {% if not topic.is_published and is_teacher %}
+    <span class="inline-block mt-2 px-2 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded-full">
+      Borrador — no visible para estudiantes
+    </span>
+    {% endif %}
+  </div>
+
+  {% if topic.description %}
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Descripción</h2>
+    <p class="text-gray-700 whitespace-pre-line">{{ topic.description }}</p>
+  </div>
+  {% endif %}
+
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Materiales</h2>
+    {% if materials %}
+    <div class="space-y-3">
+      {% for mat in materials %}
+      <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-edu-primary transition">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm
+            {% if mat.material_type == 'file' %}bg-blue-50 text-blue-600{% else %}bg-green-50 text-green-600{% endif %}">
+            {% if mat.material_type == 'file' %}📄{% else %}🔗{% endif %}
+          </div>
+          <span class="text-sm font-medium text-gray-800">{{ mat.title }}</span>
+        </div>
+        {% if mat.material_type == 'link' and mat.url %}
+        <a href="{{ mat.url }}" target="_blank" rel="noopener noreferrer"
+           class="text-xs text-edu-primary hover:underline">Abrir →</a>
+        {% elif mat.file %}
+        <a href="{{ mat.file.url }}" target="_blank"
+           class="text-xs text-edu-primary hover:underline">Descargar →</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-400 text-sm">
+      {% if is_teacher %}
+      Sin materiales aún.
+      <a href="/temas/{{ topic.id }}/materiales/subir/" class="text-edu-primary hover:underline">Sube el primero</a>.
+      {% else %}
+      No hay materiales disponibles para este tema.
+      {% endif %}
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
