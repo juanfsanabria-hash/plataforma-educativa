@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Course, Enrollment, Grade, Attendance
+from accounts.admin import secure_admin
+from .models import Course, Enrollment, Grade, Attendance, Topic, TopicMaterial
 
 
 @admin.register(Course)
@@ -32,10 +33,6 @@ class AttendanceAdmin(admin.ModelAdmin):
     list_filter = ('status', 'date', 'recorded_by')
     search_fields = ('enrollment__student__email',)
     readonly_fields = ('created_at',)
-
-
-from accounts.admin import secure_admin
-from .models import Topic, TopicMaterial
 
 
 class TopicMaterialInline(admin.TabularInline):
