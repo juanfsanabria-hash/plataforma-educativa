@@ -1,187 +1,104 @@
 {% extends 'base/base.html' %}
+{% block title %}Dashboard Director{% endblock %}
 
-{% block title %}Dashboard Director - Plataforma Educativa{% endblock %}
+{% block extra_css %}
+<style>
+  .fc-event { cursor: pointer; border-radius: 6px; font-size: 0.82rem; }
+  .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <!-- Page Header -->
-    <div class="sm:flex sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">Dashboard Directivo</h1>
-            <p class="mt-2 text-gray-600">Gestión general de la institución</p>
-        </div>
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Dirección</h1>
+      <p class="text-gray-500 text-sm mt-1">
+        {% for inst in institutions %}{{ inst.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+      </p>
     </div>
+    <a href="/perfil/" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition">Mi perfil</a>
+  </div>
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Total Estudiantes -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-primary">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Total Estudiantes</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ total_students }}</p>
-                </div>
-                <div class="text-4xl">👨‍🎓</div>
-            </div>
-        </div>
-
-        <!-- Total Docentes -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-secondary">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Total Docentes</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ total_teachers }}</p>
-                </div>
-                <div class="text-4xl">👨‍🏫</div>
-            </div>
-        </div>
-
-        <!-- Total Cursos -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-accent">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Total Cursos</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ total_courses }}</p>
-                </div>
-                <div class="text-4xl">📚</div>
-            </div>
-        </div>
-
-        <!-- Pagos Pendientes -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Pagos Pendientes</p>
-                    <p class="mt-2 text-3xl font-bold text-red-600">{{ pending_payments }}</p>
-                </div>
-                <div class="text-4xl">💰</div>
-            </div>
-        </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Estudiantes</p>
+      <p class="text-2xl font-bold text-edu-primary mt-1">{{ total_students }}</p>
     </div>
-
-    <!-- Instituciones Administradas -->
-    {% if institutions %}
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-6">Instituciones Administradas</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% for institution in institutions %}
-            <div class="p-4 border border-gray-200 rounded-lg hover:shadow-lg transition">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <h4 class="font-bold text-gray-900">{{ institution.name }}</h4>
-                        <p class="text-sm text-gray-600 mt-1">{{ institution.description|truncatewords:10 }}</p>
-                        <div class="mt-3 flex items-center space-x-4 text-sm text-gray-500">
-                            <span>📧 {{ institution.email }}</span>
-                            <span>📱 {{ institution.phone }}</span>
-                        </div>
-                    </div>
-                    <a href="/admin/accounts/institution/{{ institution.id }}/change/" class="text-edu-primary hover:text-blue-700">
-                        →
-                    </a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Docentes</p>
+      <p class="text-2xl font-bold text-green-600 mt-1">{{ total_teachers }}</p>
     </div>
-    {% endif %}
-
-    <!-- Acciones Rápidas -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Acciones Rápidas</h3>
-            <div class="space-y-3">
-                <a href="/admin/academic/course/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📖</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Ver Cursos</p>
-                        <p class="text-sm text-gray-500">Gestionar todas las asignaturas</p>
-                    </div>
-                </a>
-
-                <a href="/admin/academic/enrollment/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📝</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Matrículas</p>
-                        <p class="text-sm text-gray-500">Gestionar inscripciones</p>
-                    </div>
-                </a>
-
-                <a href="/admin/administrative/payment/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">💳</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Pagos</p>
-                        <p class="text-sm text-gray-500">Gestionar cuentas por cobrar</p>
-                    </div>
-                </a>
-
-                <a href="/admin/academic/grade/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📊</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Calificaciones</p>
-                        <p class="text-sm text-gray-500">Revisar desempeño académico</p>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Reportes -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Reportes Disponibles</h3>
-            <div class="space-y-3">
-                <button class="w-full text-left flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📈</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Rendimiento Académico</p>
-                        <p class="text-sm text-gray-500">Por período y asignatura</p>
-                    </div>
-                </button>
-
-                <button class="w-full text-left flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">👥</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Asistencia</p>
-                        <p class="text-sm text-gray-500">Por estudiante y período</p>
-                    </div>
-                </button>
-
-                <button class="w-full text-left flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">💵</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Tesorería</p>
-                        <p class="text-sm text-gray-500">Ingresos y pagos pendientes</p>
-                    </div>
-                </button>
-
-                <button class="w-full text-left flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📋</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Boletines</p>
-                        <p class="text-sm text-gray-500">Generar reportes de calificaciones</p>
-                    </div>
-                </button>
-            </div>
-        </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Cursos</p>
+      <p class="text-2xl font-bold text-purple-600 mt-1">{{ total_courses }}</p>
     </div>
-
-    <!-- Indicadores Clave -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-            <p class="text-sm font-medium text-blue-900">Relación Estudiante-Docente</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">{{ total_students|add:1 }}:1</p>
-            <p class="text-xs text-blue-700 mt-2">Índice de alumnos por profesor</p>
-        </div>
-
-        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
-            <p class="text-sm font-medium text-green-900">Tasa de Retención</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">96%</p>
-            <p class="text-xs text-green-700 mt-2">Estudiantes que continúan</p>
-        </div>
-
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
-            <p class="text-sm font-medium text-purple-900">Recaudo de Matrículas</p>
-            <p class="text-3xl font-bold text-purple-600 mt-2">92%</p>
-            <p class="text-xs text-purple-700 mt-2">Pagos completados</p>
-        </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Pagos pendientes</p>
+      <p class="text-2xl font-bold text-orange-500 mt-1">{{ pending_payments }}</p>
     </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <div id="calendar"></div>
+  </div>
+
+  {% if institutions %}
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Mis Instituciones</h2>
+    <div class="space-y-3">
+      {% for inst in institutions %}
+      <div class="flex items-center justify-between p-4 rounded-xl border border-gray-100">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-edu-primary flex items-center justify-center text-white font-bold">
+            {{ inst.name|first }}
+          </div>
+          <div>
+            <p class="font-semibold text-gray-900">{{ inst.name }}</p>
+            <p class="text-sm text-gray-500">{{ inst.email }}</p>
+          </div>
+        </div>
+        <span class="text-xs px-2 py-1 rounded-full {% if inst.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+          {% if inst.is_active %}Activa{% else %}Inactiva{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    locale: 'es',
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left:   'prev,next today',
+      center: 'title',
+      right:  'dayGridMonth,timeGridWeek,listMonth'
+    },
+    buttonText: { today:'Hoy', month:'Mes', week:'Semana', list:'Lista' },
+    events: '/api/events/',
+    eventClick: function(info) {
+      info.jsEvent.preventDefault();
+      if (info.event.url) window.location.href = info.event.url;
+    },
+    dateClick: function(info) {
+      calendar.changeView('timeGridDay', info.dateStr);
+    },
+    eventDidMount: function(info) {
+      if (info.event.extendedProps.description) {
+        info.el.title = info.event.extendedProps.description;
+      }
+    },
+    height: 'auto',
+    nowIndicator: true,
+  });
+  calendar.render();
+});
+</script>
 {% endblock %}
