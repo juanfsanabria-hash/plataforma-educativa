@@ -110,7 +110,7 @@ class CourseDetailViewTest(TestCase):
         self.year = make_academic_year(self.inst)
         self.course = make_course(self.inst, self.year, self.teacher)
         from academic.models import Enrollment
-        Enrollment.objects.create(course=self.course, student=self.student)
+        Enrollment.objects.create(course=self.course, student=self.student, status='active')
         Topic.objects.create(course=self.course, title='Tema 1', order=1, is_published=True)
         Topic.objects.create(course=self.course, title='Tema borrador', order=2, is_published=False)
 

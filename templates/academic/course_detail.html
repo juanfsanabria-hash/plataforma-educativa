@@ -38,9 +38,11 @@
         </div>
       </div>
       <div class="flex items-center space-x-3">
+        {% with mat_count=topic.materials.all|length %}
         <span class="text-xs text-gray-400">
-          {{ topic.materials.count }} material{% if topic.materials.count != 1 %}es{% endif %}
+          {{ mat_count }} material{% if mat_count != 1 %}es{% endif %}
         </span>
+        {% endwith %}
         {% if is_teacher and not topic.is_published %}
         <span class="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded-full">Borrador</span>
         {% endif %}

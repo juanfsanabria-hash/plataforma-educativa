@@ -370,7 +370,8 @@ def course_detail(request, course_id):
     if not is_teacher and not is_enrolled:
         return HttpResponseForbidden()
 
-    topics = course.topics.all() if is_teacher else course.topics.filter(is_published=True)
+    qs = course.topics.all() if is_teacher else course.topics.filter(is_published=True)
+    topics = qs.prefetch_related('materials')
     return render(request, 'academic/course_detail.html', {
         'course': course,
         'topics': topics,
