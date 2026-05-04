@@ -1,201 +1,97 @@
 {% extends 'base/base.html' %}
+{% block title %}Dashboard Docente{% endblock %}
 
-{% block title %}Dashboard Docente - Plataforma Educativa{% endblock %}
+{% block extra_css %}
+<style>
+  .fc-event { cursor: pointer; border-radius: 6px; font-size: 0.82rem; }
+  .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <!-- Page Header -->
-    <div class="sm:flex sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">Dashboard Docente</h1>
-            <p class="mt-2 text-gray-600">Gestión de tus cursos y estudiantes</p>
-        </div>
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Hola, {{ user.first_name }} 👋</h1>
+      <p class="text-gray-500 text-sm mt-1">Panel docente</p>
     </div>
+    <a href="/perfil/" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition">Mi perfil</a>
+  </div>
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Total Cursos -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-primary">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Mis Cursos</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ courses.count }}</p>
-                    <p class="mt-2 text-xs text-gray-500">Este período</p>
-                </div>
-                <div class="text-4xl">📚</div>
-            </div>
-        </div>
-
-        <!-- Total Estudiantes -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-edu-secondary">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Total Estudiantes</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">{{ total_enrollments }}</p>
-                    <p class="mt-2 text-xs text-gray-500">Inscritos en tus cursos</p>
-                </div>
-                <div class="text-4xl">👨‍🎓</div>
-            </div>
-        </div>
-
-        <!-- Pendientes de Calificar -->
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Pendientes</p>
-                    <p class="mt-2 text-3xl font-bold text-orange-600">{{ pending_grades }}</p>
-                    <p class="mt-2 text-xs text-gray-500">Evaluaciones sin calificar</p>
-                </div>
-                <div class="text-4xl">⚠️</div>
-            </div>
-        </div>
+  <div class="grid grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Mis Cursos</p>
+      <p class="text-2xl font-bold text-edu-primary mt-1">{{ courses.count }}</p>
     </div>
-
-    <!-- Mis Cursos -->
-    {% if courses %}
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-6">Mis Cursos Activos</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% for course in courses %}
-            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <h4 class="font-bold text-gray-900">{{ course.name }}</h4>
-                        <p class="text-sm text-gray-600">{{ course.academic_year.name }}</p>
-                    </div>
-                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">Activo</span>
-                </div>
-                <p class="text-sm text-gray-700 mb-4">{{ course.description|default:"Sin descripción" }}</p>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-600">
-                        {% with course.enrollment_set.count as count %}
-                        👨‍🎓 {{ count }} estudiante{{ count|pluralize }}
-                        {% endwith %}
-                    </span>
-                    <a href="/admin/academic/enrollment/?course__id__exact={{ course.id }}" class="text-edu-primary hover:text-blue-700 font-medium">
-                        Ver →
-                    </a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Estudiantes</p>
+      <p class="text-2xl font-bold text-green-600 mt-1">{{ total_enrollments }}</p>
     </div>
-    {% else %}
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-        <p class="text-yellow-900">No tienes cursos asignados en este período.</p>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">Notas pendientes</p>
+      <p class="text-2xl font-bold text-orange-500 mt-1">{{ pending_grades }}</p>
     </div>
-    {% endif %}
+  </div>
 
-    <!-- Acciones Rápidas y Pendientes -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Acciones Rápidas -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Acciones Rápidas</h3>
-            <div class="space-y-3">
-                <a href="/admin/academic/grade/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">✏️</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Calificar</p>
-                        <p class="text-sm text-gray-500">Ingresar evaluaciones</p>
-                    </div>
-                </a>
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <div id="calendar"></div>
+  </div>
 
-                <a href="/admin/academic/attendance/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📋</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Asistencia</p>
-                        <p class="text-sm text-gray-500">Registrar asistencias</p>
-                    </div>
-                </a>
-
-                <a href="/admin/academic/grade/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📊</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Reportes</p>
-                        <p class="text-sm text-gray-500">Ver desempeño de estudiantes</p>
-                    </div>
-                </a>
-
-                <a href="/admin/communication/announcement/" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                    <span class="text-2xl mr-3">📢</span>
-                    <div>
-                        <p class="font-medium text-gray-900">Anuncios</p>
-                        <p class="text-sm text-gray-500">Comunicar a estudiantes</p>
-                    </div>
-                </a>
-            </div>
+  {% if courses %}
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Mis Cursos</h2>
+    <div class="grid md:grid-cols-2 gap-4">
+      {% for course in courses %}
+      <a href="/api/v1/courses/{{ course.id }}/"
+         class="flex items-center space-x-4 p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition group">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-edu-primary flex items-center justify-center text-white font-bold text-lg">
+          {{ course.name|first }}
         </div>
-
-        <!-- Pendientes -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Tareas Pendientes</h3>
-            <div class="space-y-3">
-                {% if pending_grades > 0 %}
-                <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                    <div class="flex items-start">
-                        <span class="text-2xl mr-3">⚠️</span>
-                        <div class="flex-1">
-                            <p class="font-medium text-orange-900">Calificaciones Pendientes</p>
-                            <p class="text-sm text-orange-700">{{ pending_grades }} evaluaciones por calificar</p>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div class="flex items-start">
-                        <span class="text-2xl mr-3">ℹ️</span>
-                        <div class="flex-1">
-                            <p class="font-medium text-blue-900">Próximas Evaluaciones</p>
-                            <p class="text-sm text-blue-700">3 evaluaciones programadas</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div class="flex items-start">
-                        <span class="text-2xl mr-3">✅</span>
-                        <div class="flex-1">
-                            <p class="font-medium text-green-900">Calendario Académico</p>
-                            <p class="text-sm text-green-700">Próximo período comienza en 15 días</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-gray-900 group-hover:text-edu-primary truncate">{{ course.name }}</p>
+          <p class="text-sm text-gray-500">{{ course.enrollments.count }} estudiantes</p>
         </div>
+        <span class="text-gray-300 group-hover:text-edu-primary">→</span>
+      </a>
+      {% endfor %}
     </div>
-
-    <!-- Últimas Actividades -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-6">Últimas Actividades</h3>
-        <div class="space-y-4">
-            <div class="flex items-start pb-4 border-b border-gray-200">
-                <span class="text-2xl mr-4">📝</span>
-                <div class="flex-1">
-                    <p class="font-medium text-gray-900">Calificaciones ingresadas</p>
-                    <p class="text-sm text-gray-600">Evaluación de Matemáticas - Grado 9B</p>
-                    <p class="text-xs text-gray-500">Hace 2 horas</p>
-                </div>
-            </div>
-
-            <div class="flex items-start pb-4 border-b border-gray-200">
-                <span class="text-2xl mr-4">📋</span>
-                <div class="flex-1">
-                    <p class="font-medium text-gray-900">Asistencia registrada</p>
-                    <p class="text-sm text-gray-600">Clase del 28 de abril de 2026</p>
-                    <p class="text-xs text-gray-500">Hoy 10:30 AM</p>
-                </div>
-            </div>
-
-            <div class="flex items-start">
-                <span class="text-2xl mr-4">💬</span>
-                <div class="flex-1">
-                    <p class="font-medium text-gray-900">Mensaje de padre</p>
-                    <p class="text-sm text-gray-600">María García - Consulta sobre calificaciones</p>
-                    <p class="text-xs text-gray-500">Ayer 03:45 PM</p>
-                </div>
-            </div>
-        </div>
-    </div>
+  </div>
+  {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    locale: 'es',
+    initialView: 'timeGridWeek',
+    headerToolbar: {
+      left:   'prev,next today',
+      center: 'title',
+      right:  'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+    },
+    buttonText: { today:'Hoy', month:'Mes', week:'Semana', day:'Día', list:'Lista' },
+    events: '/api/events/',
+    eventClick: function(info) {
+      info.jsEvent.preventDefault();
+      if (info.event.url) window.location.href = info.event.url;
+    },
+    dateClick: function(info) {
+      calendar.changeView('timeGridDay', info.dateStr);
+    },
+    eventDidMount: function(info) {
+      if (info.event.extendedProps.description) {
+        info.el.title = info.event.extendedProps.description;
+      }
+    },
+    height: 'auto',
+    nowIndicator: true,
+    slotMinTime: '06:00:00',
+    slotMaxTime: '20:00:00',
+  });
+  calendar.render();
+});
+</script>
 {% endblock %}
