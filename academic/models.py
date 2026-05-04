@@ -129,7 +129,7 @@ class Topic(models.Model):
     class Meta:
         verbose_name = _('Tema')
         verbose_name_plural = _('Temas')
-        ordering = ['order', 'date']
+        ordering = ['order', 'date', 'id']
 
     def __str__(self):
         return f"{self.course.name} — {self.order}. {self.title}"
@@ -143,7 +143,7 @@ class TopicMaterial(models.Model):
 
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='materials')
     title = models.CharField(max_length=255, verbose_name=_('Título'))
-    material_type = models.CharField(max_length=10, choices=MATERIAL_TYPES)
+    material_type = models.CharField(max_length=10, choices=MATERIAL_TYPES, verbose_name=_('Tipo'))
     file = models.FileField(
         upload_to='materials/%Y/%m/', null=True, blank=True, verbose_name=_('Archivo')
     )
@@ -154,6 +154,13 @@ class TopicMaterial(models.Model):
         verbose_name = _('Material')
         verbose_name_plural = _('Materiales')
         ordering = ['created_at']
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.material_type == 'file' and not self.file:
+            raise ValidationError({'file': 'Se requiere un archivo para materiales de tipo "Archivo".'})
+        if self.material_type == 'link' and not self.url:
+            raise ValidationError({'url': 'Se requiere una URL para materiales de tipo "Enlace".'})
 
     def __str__(self):
         return f"{self.topic.title} — {self.title}"

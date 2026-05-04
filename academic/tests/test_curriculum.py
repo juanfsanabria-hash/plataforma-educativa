@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from accounts.models import Institution, AcademicYear
 from academic.models import Course, Topic, TopicMaterial
 
@@ -68,3 +69,15 @@ class TopicModelTest(TestCase):
         )
         self.assertEqual(mat.topic, topic)
         self.assertEqual(mat.material_type, 'link')
+
+    def test_material_file_type_requires_file(self):
+        topic = Topic.objects.create(course=self.course, title='Tema', order=1)
+        mat = TopicMaterial(topic=topic, title='Sin archivo', material_type='file')
+        with self.assertRaises(ValidationError):
+            mat.full_clean()
+
+    def test_material_link_type_requires_url(self):
+        topic = Topic.objects.create(course=self.course, title='Tema', order=1)
+        mat = TopicMaterial(topic=topic, title='Sin URL', material_type='link')
+        with self.assertRaises(ValidationError):
+            mat.full_clean()
