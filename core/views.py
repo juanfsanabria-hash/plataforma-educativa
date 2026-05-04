@@ -1,15 +1,18 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import Count, Avg, Q
+from django.db import models as db_models
+from django.utils.dateparse import parse_datetime
 from django.views.decorators.http import require_http_methods
 from django import forms as django_forms
 from accounts.models import CustomUser, Institution
 from accounts.forms import LoginForm, RegisterForm
 from academic.models import Course, Enrollment, Grade, Attendance
 from administrative.models import Payment, StudentProfile
+from .models import ScheduleEvent
 
 
 def role_required(roles):
@@ -315,6 +318,46 @@ def profile_view(request):
     else:
         form = ProfileUpdateForm(instance=request.user)
     return render(request, 'profile/profile.html', {'form': form})
+
+
+@login_required
+def events_json(request):
+    user = request.user
+    start_str = request.GET.get('start')
+    end_str   = request.GET.get('end')
+
+    qs = ScheduleEvent.objects.filter(
+        db_models.Q(attendees=user) | db_models.Q(created_by=user)
+    ).distinct()
+
+    if start_str:
+        qs = qs.filter(end__gte=parse_datetime(start_str))
+    if end_str:
+        qs = qs.filter(start__lte=parse_datetime(end_str))
+
+    events = [
+        {
+            'id':    e.id,
+            'title': e.title,
+            'start': e.start.isoformat(),
+            'end':   e.end.isoformat(),
+            'allDay': e.all_day,
+            'color': e.color,
+            'url':   e.url or f'/eventos/{e.id}/',
+            'extendedProps': {
+                'type':        e.event_type,
+                'description': e.description,
+            },
+        }
+        for e in qs
+    ]
+    return JsonResponse(events, safe=False)
+
+
+@login_required
+def event_detail(request, event_id):
+    event = get_object_or_404(ScheduleEvent, id=event_id)
+    return render(request, 'calendar/event_detail.html', {'event': event})
 
 
 def health_check(request):

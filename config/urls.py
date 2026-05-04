@@ -23,6 +23,8 @@ from core.views import (
     padre_dashboard,
     health_check,
     profile_view,
+    events_json,
+    event_detail,
 )
 
 # API Router
@@ -68,6 +70,12 @@ urlpatterns = [
 
     # Admin interface
     path('admin/', secure_admin.urls),
+
+    # FullCalendar JSON feed
+    path('api/events/', events_json, name='events-json'),
+
+    # Event detail view
+    path('eventos/<int:event_id>/', event_detail, name='event-detail'),
 
     # REST API endpoints
     path('api/v1/', include(router.urls)),
