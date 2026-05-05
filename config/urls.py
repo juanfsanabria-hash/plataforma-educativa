@@ -37,6 +37,7 @@ from core.views import (
     attendance_list,
     attendance_entry,
     event_create,
+    mark_all_read,
 )
 
 # API Router
@@ -88,6 +89,9 @@ urlpatterns = [
 
     # Event create endpoint (POST JSON)
     path('api/eventos/crear/', event_create, name='event-create'),
+
+    # Notifications
+    path('api/notificaciones/marcar-todas/', mark_all_read, name='mark-all-read'),
 
     # Event detail view
     path('eventos/<int:event_id>/', event_detail, name='event-detail'),

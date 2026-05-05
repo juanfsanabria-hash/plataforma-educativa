@@ -9,6 +9,7 @@ from django.utils.dateparse import parse_datetime
 from django.views.decorators.http import require_http_methods
 from django import forms as django_forms
 from accounts.models import CustomUser, Institution
+from communication.models import Notification
 from accounts.forms import LoginForm, RegisterForm
 from academic.models import Course, Enrollment, Grade, Attendance, Topic, TopicMaterial
 from administrative.models import Payment, StudentProfile
@@ -757,6 +758,14 @@ def event_create(request):
             'study_material': event.study_material,
         },
     }, status=201)
+
+
+@login_required
+@require_http_methods(["POST"])
+def mark_all_read(request):
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True, read_at=now)
+    return JsonResponse({'ok': True})
 
 
 def health_check(request):
