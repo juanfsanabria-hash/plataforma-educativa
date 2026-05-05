@@ -42,7 +42,7 @@
   </div>
 
   {% if enrollments %}
-  <div class="bg-white rounded-2xl shadow-sm p-6">
+  <div class="bg-white rounded-2xl shadow-sm p-6" id="cursos">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Mis Cursos</h2>
     <div class="grid md:grid-cols-2 gap-4">
       {% for enrollment in enrollments %}
@@ -61,6 +61,28 @@
     </div>
   </div>
   {% endif %}
+
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <a href="#cursos" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+        <span class="text-3xl mb-2">📚</span>
+        <p class="text-sm font-semibold text-gray-700">Mis Cursos</p>
+      </a>
+      <a href="/api/v1/grades/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+        <span class="text-3xl mb-2">📊</span>
+        <p class="text-sm font-semibold text-gray-700">Ver Notas</p>
+      </a>
+      <a href="/api/v1/attendance/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+        <span class="text-3xl mb-2">📋</span>
+        <p class="text-sm font-semibold text-gray-700">Mi Asistencia</p>
+      </a>
+      <a href="/perfil/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+        <span class="text-3xl mb-2">👤</span>
+        <p class="text-sm font-semibold text-gray-700">Mi Perfil</p>
+      </a>
+    </div>
+  </div>
 </div>
 {% endblock %}
 

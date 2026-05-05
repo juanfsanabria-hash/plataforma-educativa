@@ -322,13 +322,21 @@ def profile_view(request):
 
 @login_required
 def events_json(request):
+    from administrative.models import StudentProfile
+
     user = request.user
     start_str = request.GET.get('start')
     end_str   = request.GET.get('end')
 
-    qs = ScheduleEvent.objects.filter(
-        db_models.Q(attendees=user) | db_models.Q(created_by=user)
-    ).distinct()
+    if user.role == 'padre':
+        hijos = StudentProfile.objects.filter(parent=user).values_list('user', flat=True)
+        qs = ScheduleEvent.objects.filter(
+            db_models.Q(attendees__in=hijos) | db_models.Q(created_by__in=hijos)
+        ).distinct()
+    else:
+        qs = ScheduleEvent.objects.filter(
+            db_models.Q(attendees=user) | db_models.Q(created_by=user)
+        ).distinct()
 
     if start_str:
         qs = qs.filter(end__gte=parse_datetime(start_str))

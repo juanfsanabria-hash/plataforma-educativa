@@ -3,7 +3,7 @@ from accounts.admin import secure_admin
 from .models import Course, Enrollment, Grade, Attendance, Topic, TopicMaterial
 
 
-@admin.register(Course)
+@admin.register(Course, site=secure_admin)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'institution', 'academic_year', 'teacher', 'is_active')
     list_filter = ('institution', 'academic_year', 'is_active', 'teacher')
@@ -11,7 +11,7 @@ class CourseAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
-@admin.register(Enrollment)
+@admin.register(Enrollment, site=secure_admin)
 class EnrollmentAdmin(admin.ModelAdmin):
     list_display = ('student', 'course', 'status', 'enrolled_date')
     list_filter = ('status', 'course__academic_year', 'enrolled_date')
@@ -19,7 +19,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
     readonly_fields = ('enrolled_date', 'created_at')
 
 
-@admin.register(Grade)
+@admin.register(Grade, site=secure_admin)
 class GradeAdmin(admin.ModelAdmin):
     list_display = ('enrollment', 'evaluation_name', 'evaluation_type', 'score')
     list_filter = ('evaluation_type', 'recorded_date')
@@ -27,7 +27,7 @@ class GradeAdmin(admin.ModelAdmin):
     readonly_fields = ('recorded_date',)
 
 
-@admin.register(Attendance)
+@admin.register(Attendance, site=secure_admin)
 class AttendanceAdmin(admin.ModelAdmin):
     list_display = ('enrollment', 'date', 'status', 'recorded_by')
     list_filter = ('status', 'date', 'recorded_by')

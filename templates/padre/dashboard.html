@@ -2,6 +2,13 @@
 
 {% block title %}Dashboard Padre/Madre - Plataforma Educativa{% endblock %}
 
+{% block extra_css %}
+<style>
+  .fc-event { cursor: pointer; border-radius: 6px; font-size: 0.82rem; }
+  .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="space-y-8">
     <!-- Page Header -->
@@ -183,29 +190,35 @@
         </div>
     </div>
 
+    <!-- Calendario del Estudiante -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Calendario Académico</h3>
+        <div id="calendar"></div>
+    </div>
+
     <!-- Acciones Rápidas -->
     <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-bold text-gray-900 mb-4">Acciones Rápidas</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button class="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition border border-gray-200">
+            <a href="/admin/communication/message/add/" class="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition border border-gray-200 text-center">
                 <span class="text-3xl mb-2">💬</span>
-                <p class="font-medium text-gray-900 text-center">Contactar Docente</p>
-            </button>
+                <p class="font-medium text-gray-900">Contactar Docente</p>
+            </a>
 
-            <button class="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition border border-gray-200">
+            <a href="#calendar" class="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition border border-gray-200 text-center">
                 <span class="text-3xl mb-2">📅</span>
-                <p class="font-medium text-gray-900 text-center">Ver Calendario</p>
-            </button>
+                <p class="font-medium text-gray-900">Ver Calendario</p>
+            </a>
 
-            <button class="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition border border-gray-200">
-                <span class="text-3xl mb-2">📋</span>
-                <p class="font-medium text-gray-900 text-center">Descargar Boletín</p>
-            </button>
-
-            <button class="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition border border-gray-200">
+            <a href="/admin/administrative/payment/" class="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition border border-gray-200 text-center">
                 <span class="text-3xl mb-2">💳</span>
-                <p class="font-medium text-gray-900 text-center">Realizar Pago</p>
-            </button>
+                <p class="font-medium text-gray-900">Ver Pagos</p>
+            </a>
+
+            <a href="/perfil/" class="flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg transition border border-gray-200 text-center">
+                <span class="text-3xl mb-2">👤</span>
+                <p class="font-medium text-gray-900">Mi Perfil</p>
+            </a>
         </div>
     </div>
 
@@ -216,4 +229,36 @@
     {% endif %}
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const calendarEl = document.getElementById('calendar');
+  if (!calendarEl) return;
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    locale: 'es',
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left:   'prev,next today',
+      center: 'title',
+      right:  'dayGridMonth,listMonth'
+    },
+    buttonText: { today:'Hoy', month:'Mes', list:'Lista' },
+    events: '/api/events/',
+    eventClick: function(info) {
+      info.jsEvent.preventDefault();
+      if (info.event.url) window.location.href = info.event.url;
+    },
+    eventDidMount: function(info) {
+      if (info.event.extendedProps.description) {
+        info.el.title = info.event.extendedProps.description;
+      }
+    },
+    height: 'auto',
+    nowIndicator: true,
+  });
+  calendar.render();
+});
+</script>
 {% endblock %}

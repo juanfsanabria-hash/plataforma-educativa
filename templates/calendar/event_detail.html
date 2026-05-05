@@ -36,10 +36,18 @@
                     <p>Creado por: <span class="font-medium">{{ event.created_by.get_full_name }}</span></p>
                 </div>
             </div>
-            {% if event.url %}
-            <div class="mt-8">
-                <a href="{{ event.url }}"
+            {% if event.event_type == 'class' and event.course_id %}
+            <div class="mt-6">
+                <a href="/cursos/{{ event.course_id }}/"
                    class="block w-full text-center py-3 bg-edu-primary text-white font-semibold rounded-xl hover:bg-blue-700 transition">
+                    📚 Ver Contenido Programático
+                </a>
+            </div>
+            {% endif %}
+            {% if event.url %}
+            <div class="mt-3">
+                <a href="{{ event.url }}"
+                   class="block w-full text-center py-3 border border-edu-primary text-edu-primary font-semibold rounded-xl hover:bg-blue-50 transition">
                     Ver detalle completo →
                 </a>
             </div>

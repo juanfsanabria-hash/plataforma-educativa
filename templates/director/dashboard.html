@@ -66,6 +66,28 @@
     </div>
   </div>
   {% endif %}
+
+  <div class="bg-white rounded-2xl shadow-sm p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <a href="/admin/core/scheduleevent/add/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+        <span class="text-3xl mb-2">📅</span>
+        <p class="text-sm font-semibold text-gray-700">Crear Evento</p>
+      </a>
+      <a href="/admin/communication/announcement/add/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+        <span class="text-3xl mb-2">📢</span>
+        <p class="text-sm font-semibold text-gray-700">Crear Anuncio</p>
+      </a>
+      <a href="/admin/academic/enrollment/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+        <span class="text-3xl mb-2">📝</span>
+        <p class="text-sm font-semibold text-gray-700">Ver Matrículas</p>
+      </a>
+      <a href="/admin/administrative/payment/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+        <span class="text-3xl mb-2">💳</span>
+        <p class="text-sm font-semibold text-gray-700">Ver Pagos</p>
+      </a>
+    </div>
+  </div>
 </div>
 {% endblock %}
 

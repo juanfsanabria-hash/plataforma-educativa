@@ -1,8 +1,9 @@
 from django.contrib import admin
+from accounts.admin import secure_admin
 from .models import StudentProfile, Payment
 
 
-@admin.register(StudentProfile)
+@admin.register(StudentProfile, site=secure_admin)
 class StudentProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'institution', 'enrollment_status', 'created_at')
     list_filter = ('institution', 'enrollment_status', 'created_at')
@@ -10,7 +11,7 @@ class StudentProfileAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
 
 
-@admin.register(Payment)
+@admin.register(Payment, site=secure_admin)
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ('student_profile', 'concept', 'amount', 'status', 'due_date')
     list_filter = ('status', 'institution', 'due_date')
