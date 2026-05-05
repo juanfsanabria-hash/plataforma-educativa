@@ -91,6 +91,8 @@
     </div>
   </div>
 </div>
+
+{% include 'includes/event_modal.html' %}
 {% endblock %}
 
 {% block extra_js %}
@@ -100,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const calendar = new FullCalendar.Calendar(calendarEl, {
     locale: 'es',
     initialView: 'timeGridWeek',
+    selectable: true,
     headerToolbar: {
       left:   'prev,next today',
       center: 'title',
@@ -112,7 +115,10 @@ document.addEventListener('DOMContentLoaded', function () {
       if (info.event.url) window.location.href = info.event.url;
     },
     dateClick: function(info) {
-      calendar.changeView('timeGridDay', info.dateStr);
+      openEventModal(info.dateStr);
+    },
+    select: function(info) {
+      openEventModal(info.startStr, info.endStr);
     },
     eventDidMount: function(info) {
       if (info.event.extendedProps.description) {
@@ -125,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
     slotMaxTime: '20:00:00',
   });
   calendar.render();
+  calendarInstance = calendar;
 });
 </script>
 {% endblock %}

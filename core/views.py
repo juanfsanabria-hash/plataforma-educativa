@@ -691,5 +691,73 @@ def attendance_entry(request, course_id, date_str):
     })
 
 
+EVENT_COLORS = {
+    'class':        '#3b82f6',
+    'evaluation':   '#ef4444',
+    'task':         '#f59e0b',
+    'meeting':      '#8b5cf6',
+    'holiday':      '#10b981',
+    'announcement': '#6b7280',
+}
+
+CREATOR_ROLES = {'admin', 'director', 'docente'}
+
+
+@login_required
+@require_http_methods(["POST"])
+def event_create(request):
+    if request.user.role not in CREATOR_ROLES:
+        return JsonResponse({'error': 'Sin permiso'}, status=403)
+
+    import json as _json
+    try:
+        data = _json.loads(request.body)
+    except ValueError:
+        return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+    title = data.get('title', '').strip()
+    if not title:
+        return JsonResponse({'error': 'El título es requerido'}, status=400)
+
+    event_type = data.get('event_type', 'class')
+    all_day = bool(data.get('all_day', False))
+
+    try:
+        start = datetime.datetime.fromisoformat(data['start'])
+        end = datetime.datetime.fromisoformat(data['end'])
+    except (KeyError, ValueError):
+        return JsonResponse({'error': 'Fechas inválidas'}, status=400)
+
+    institution = getattr(request.user, 'institution', None)
+
+    event = ScheduleEvent.objects.create(
+        created_by=request.user,
+        institution=institution,
+        event_type=event_type,
+        title=title,
+        description=data.get('description', ''),
+        study_material=data.get('study_material', ''),
+        start=start,
+        end=end,
+        all_day=all_day,
+        color=EVENT_COLORS.get(event_type, '#3b82f6'),
+    )
+
+    return JsonResponse({
+        'id':    event.id,
+        'title': event.title,
+        'start': event.start.isoformat(),
+        'end':   event.end.isoformat(),
+        'allDay': event.all_day,
+        'color': event.color,
+        'url':   f'/eventos/{event.id}/',
+        'extendedProps': {
+            'type':          event.event_type,
+            'description':   event.description,
+            'study_material': event.study_material,
+        },
+    }, status=201)
+
+
 def health_check(request):
     return JsonResponse({'status': 'ok'})

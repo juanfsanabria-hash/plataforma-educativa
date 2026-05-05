@@ -1,0 +1,183 @@
+<!-- Modal overlay -->
+<div id="event-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-40">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="text-base font-semibold text-gray-900">Nuevo evento</h2>
+      <button onclick="closeEventModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+
+    <div class="px-6 py-5 space-y-4">
+      <!-- Título -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Título <span class="text-red-500">*</span></label>
+        <input id="ev-title" type="text" placeholder="Ej. Clase de álgebra"
+               class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-edu-primary">
+      </div>
+
+      <!-- Tipo -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+        <select id="ev-type"
+                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-edu-primary">
+          <option value="class">Clase</option>
+          <option value="evaluation">Evaluación</option>
+          <option value="task">Tarea</option>
+          <option value="meeting">Reunión</option>
+          <option value="holiday">Festivo/Vacaciones</option>
+          <option value="announcement">Anuncio</option>
+        </select>
+      </div>
+
+      <!-- Fechas y horas -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Inicio</label>
+          <input id="ev-start-date" type="date"
+                 class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-edu-primary">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Hora inicio</label>
+          <input id="ev-start-time" type="time" value="08:00"
+                 class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-edu-primary">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Fin</label>
+          <input id="ev-end-date" type="date"
+                 class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-edu-primary">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Hora fin</label>
+          <input id="ev-end-time" type="time" value="09:00"
+                 class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-edu-primary">
+        </div>
+      </div>
+
+      <!-- Todo el día -->
+      <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+        <input id="ev-allday" type="checkbox" class="rounded" onchange="toggleAllDay(this)">
+        Todo el día
+      </label>
+
+      <!-- Descripción -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+        <textarea id="ev-description" rows="2" placeholder="Detalles del evento..."
+                  class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-edu-primary resize-none"></textarea>
+      </div>
+
+      <!-- Material de estudio -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Material de estudio</label>
+        <textarea id="ev-study-material" rows="2"
+                  placeholder="Links de interés, bibliografía recomendada..."
+                  class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-edu-primary resize-none"></textarea>
+      </div>
+
+      <p id="ev-error" class="text-xs text-red-500 hidden"></p>
+    </div>
+
+    <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50">
+      <button onclick="closeEventModal()"
+              class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-white transition">
+        Cancelar
+      </button>
+      <button onclick="submitEvent()"
+              class="px-5 py-2 bg-edu-primary text-white text-sm rounded-lg hover:bg-edu-secondary transition font-medium">
+        Crear evento
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+var calendarInstance = null;
+
+function openEventModal(startDate, endDate) {
+  document.getElementById('ev-title').value = '';
+  document.getElementById('ev-type').value = 'class';
+  document.getElementById('ev-description').value = '';
+  document.getElementById('ev-study-material').value = '';
+  document.getElementById('ev-allday').checked = false;
+  document.getElementById('ev-error').classList.add('hidden');
+
+  var start = startDate || new Date().toISOString().slice(0, 10);
+  var end = endDate || start;
+  document.getElementById('ev-start-date').value = start.slice(0, 10);
+  document.getElementById('ev-end-date').value = end.slice(0, 10);
+  document.getElementById('ev-start-time').disabled = false;
+  document.getElementById('ev-end-time').disabled = false;
+
+  var modal = document.getElementById('event-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.getElementById('ev-title').focus();
+}
+
+function closeEventModal() {
+  var modal = document.getElementById('event-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function toggleAllDay(cb) {
+  document.getElementById('ev-start-time').disabled = cb.checked;
+  document.getElementById('ev-end-time').disabled = cb.checked;
+}
+
+function getCsrfToken() {
+  var cookies = document.cookie.split(';');
+  for (var i = 0; i < cookies.length; i++) {
+    var c = cookies[i].trim();
+    if (c.startsWith('csrftoken=')) return decodeURIComponent(c.slice(10));
+  }
+  return '';
+}
+
+function submitEvent() {
+  var title = document.getElementById('ev-title').value.trim();
+  var errEl = document.getElementById('ev-error');
+  if (!title) {
+    errEl.textContent = 'El título es requerido.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  var allDay = document.getElementById('ev-allday').checked;
+  var startDate = document.getElementById('ev-start-date').value;
+  var endDate = document.getElementById('ev-end-date').value;
+  var startTime = allDay ? 'T00:00:00' : 'T' + document.getElementById('ev-start-time').value + ':00';
+  var endTime   = allDay ? 'T23:59:00' : 'T' + document.getElementById('ev-end-time').value + ':00';
+
+  fetch('/api/eventos/crear/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+    body: JSON.stringify({
+      title: title,
+      event_type: document.getElementById('ev-type').value,
+      description: document.getElementById('ev-description').value,
+      study_material: document.getElementById('ev-study-material').value,
+      start: startDate + startTime,
+      end: endDate + endTime,
+      all_day: allDay,
+    }),
+  })
+  .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+  .then(function(res) {
+    if (!res.ok) {
+      errEl.textContent = res.data.error || 'Error al crear el evento.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    closeEventModal();
+    if (calendarInstance) calendarInstance.refetchEvents();
+  })
+  .catch(function() {
+    errEl.textContent = 'Error de conexión.';
+    errEl.classList.remove('hidden');
+  });
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeEventModal();
+});
+</script>

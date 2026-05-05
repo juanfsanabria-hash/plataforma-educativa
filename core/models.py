@@ -31,9 +31,10 @@ class ScheduleEvent(models.Model):
     all_day     = models.BooleanField(default=False)
     color       = models.CharField(max_length=7, default='#3b82f6')
     course_id   = models.PositiveIntegerField(null=True, blank=True)
-    url         = models.CharField(max_length=500, blank=True)
-    created_at  = models.DateTimeField(auto_now_add=True)
-    updated_at  = models.DateTimeField(auto_now=True)
+    url             = models.CharField(max_length=500, blank=True)
+    study_material  = models.TextField(blank=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
+    updated_at      = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _('Evento')

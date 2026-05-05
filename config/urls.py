@@ -36,6 +36,7 @@ from core.views import (
     grade_entry,
     attendance_list,
     attendance_entry,
+    event_create,
 )
 
 # API Router
@@ -84,6 +85,9 @@ urlpatterns = [
 
     # FullCalendar JSON feed
     path('api/events/', events_json, name='events-json'),
+
+    # Event create endpoint (POST JSON)
+    path('api/eventos/crear/', event_create, name='event-create'),
 
     # Event detail view
     path('eventos/<int:event_id>/', event_detail, name='event-detail'),

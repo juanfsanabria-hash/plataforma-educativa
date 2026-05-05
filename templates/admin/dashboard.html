@@ -262,6 +262,8 @@
         </div>
     </div>
 </div>
+
+{% include 'includes/event_modal.html' %}
 {% endblock %}
 
 {% block extra_js %}
@@ -271,6 +273,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const calendar = new FullCalendar.Calendar(calendarEl, {
     locale: 'es',
     initialView: 'dayGridMonth',
+    selectable: true,
     headerToolbar: {
       left:   'prev,next today',
       center: 'title',
@@ -282,6 +285,12 @@ document.addEventListener('DOMContentLoaded', function () {
       info.jsEvent.preventDefault();
       if (info.event.url) window.location.href = info.event.url;
     },
+    dateClick: function(info) {
+      openEventModal(info.dateStr);
+    },
+    select: function(info) {
+      openEventModal(info.startStr, info.endStr);
+    },
     eventDidMount: function(info) {
       if (info.event.extendedProps.description) {
         info.el.title = info.event.extendedProps.description;
@@ -291,6 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
     nowIndicator: true,
   });
   calendar.render();
+  calendarInstance = calendar;
 });
 </script>
 {% endblock %}
