@@ -488,5 +488,208 @@ def topic_detail(request, topic_id):
     })
 
 
+import datetime
+
+ATTENDANCE_STATUSES = [
+    ('present', 'Presente'),
+    ('absent', 'Ausente'),
+    ('late', 'Tarde'),
+    ('excused', 'Excusado'),
+]
+
+EVALUATION_TYPES = [
+    ('exam', 'Examen'),
+    ('quiz', 'Quiz'),
+    ('assignment', 'Tarea'),
+    ('project', 'Proyecto'),
+    ('participation', 'Participación'),
+    ('other', 'Otro'),
+]
+
+
+@login_required
+def grade_list(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    if course.teacher != request.user:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        eval_name = request.POST.get('evaluation_name', '').strip()
+        eval_type = request.POST.get('evaluation_type', 'exam')
+        max_score = request.POST.get('max_score', '100')
+        weight = request.POST.get('weight', '1')
+        if eval_name:
+            import urllib.parse
+            return redirect(
+                f"/cursos/{course_id}/calificaciones/{urllib.parse.quote(eval_name, safe='')}/"
+                f"?eval_type={eval_type}&max_score={max_score}&weight={weight}"
+            )
+
+    evaluations = (
+        Grade.objects.filter(enrollment__course=course)
+        .values('evaluation_name', 'evaluation_type', 'max_score', 'weight')
+        .annotate(
+            total=Count('id'),
+            graded=Count('score', filter=Q(score__isnull=False)),
+        )
+        .order_by('evaluation_name')
+    )
+
+    return render(request, 'academic/grade_list.html', {
+        'course': course,
+        'evaluations': evaluations,
+        'evaluation_types': EVALUATION_TYPES,
+    })
+
+
+@login_required
+def grade_entry(request, course_id, evaluation_name):
+    course = get_object_or_404(Course, id=course_id)
+    if course.teacher != request.user:
+        return HttpResponseForbidden()
+
+    enrollments = (
+        Enrollment.objects.filter(course=course, status='active')
+        .select_related('student')
+        .order_by('student__last_name', 'student__first_name')
+    )
+
+    existing = Grade.objects.filter(
+        enrollment__course=course, evaluation_name=evaluation_name
+    ).first()
+
+    if existing:
+        eval_type = existing.evaluation_type
+        max_score = existing.max_score
+        weight = existing.weight
+    else:
+        eval_type = request.GET.get('eval_type', 'exam')
+        max_score = request.GET.get('max_score', '100')
+        weight = request.GET.get('weight', '1')
+
+    if request.method == 'POST':
+        eval_type = request.POST.get('eval_type', eval_type)
+        max_score_raw = request.POST.get('max_score', str(max_score))
+        weight_raw = request.POST.get('weight', str(weight))
+
+        for enrollment in enrollments:
+            raw_score = request.POST.get(f'score_{enrollment.id}', '').strip()
+            notes = request.POST.get(f'notes_{enrollment.id}', '').strip()
+            score = None
+            if raw_score != '':
+                try:
+                    score = float(raw_score)
+                except ValueError:
+                    pass
+            Grade.objects.update_or_create(
+                enrollment=enrollment,
+                evaluation_name=evaluation_name,
+                defaults={
+                    'evaluation_type': eval_type,
+                    'max_score': max_score_raw,
+                    'weight': weight_raw,
+                    'score': score,
+                    'notes': notes,
+                },
+            )
+
+        messages.success(request, f'Calificaciones guardadas para "{evaluation_name}".')
+        return redirect('grade-list', course_id=course_id)
+
+    grade_map = {
+        g.enrollment_id: g
+        for g in Grade.objects.filter(
+            enrollment__course=course, evaluation_name=evaluation_name
+        )
+    }
+    rows = [{'enrollment': e, 'grade': grade_map.get(e.id)} for e in enrollments]
+
+    return render(request, 'academic/grade_entry.html', {
+        'course': course,
+        'evaluation_name': evaluation_name,
+        'eval_type': eval_type,
+        'max_score': max_score,
+        'weight': weight,
+        'rows': rows,
+        'evaluation_types': EVALUATION_TYPES,
+    })
+
+
+@login_required
+def attendance_list(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    if course.teacher != request.user:
+        return HttpResponseForbidden()
+
+    dates = (
+        Attendance.objects.filter(enrollment__course=course)
+        .values('date')
+        .annotate(
+            present=Count('id', filter=Q(status='present')),
+            absent=Count('id', filter=Q(status='absent')),
+            late=Count('id', filter=Q(status='late')),
+            excused=Count('id', filter=Q(status='excused')),
+            total=Count('id'),
+        )
+        .order_by('-date')
+    )
+
+    today = datetime.date.today().isoformat()
+    return render(request, 'academic/attendance_list.html', {
+        'course': course,
+        'dates': dates,
+        'today': today,
+    })
+
+
+@login_required
+def attendance_entry(request, course_id, date_str):
+    course = get_object_or_404(Course, id=course_id)
+    if course.teacher != request.user:
+        return HttpResponseForbidden()
+
+    try:
+        entry_date = datetime.date.fromisoformat(date_str)
+    except ValueError:
+        return redirect('attendance-list', course_id=course_id)
+
+    enrollments = (
+        Enrollment.objects.filter(course=course, status='active')
+        .select_related('student')
+        .order_by('student__last_name', 'student__first_name')
+    )
+
+    if request.method == 'POST':
+        for enrollment in enrollments:
+            status = request.POST.get(f'status_{enrollment.id}', 'present')
+            notes = request.POST.get(f'notes_{enrollment.id}', '').strip()
+            Attendance.objects.update_or_create(
+                enrollment=enrollment,
+                date=entry_date,
+                defaults={
+                    'status': status,
+                    'notes': notes,
+                    'recorded_by': request.user,
+                },
+            )
+        messages.success(request, f'Asistencia guardada para {entry_date.strftime("%d/%m/%Y")}.')
+        return redirect('attendance-list', course_id=course_id)
+
+    record_map = {
+        a.enrollment_id: a
+        for a in Attendance.objects.filter(
+            enrollment__course=course, date=entry_date
+        )
+    }
+    rows = [{'enrollment': e, 'record': record_map.get(e.id)} for e in enrollments]
+
+    return render(request, 'academic/attendance_entry.html', {
+        'course': course,
+        'entry_date': entry_date,
+        'rows': rows,
+        'statuses': ATTENDANCE_STATUSES,
+    })
+
+
 def health_check(request):
     return JsonResponse({'status': 'ok'})

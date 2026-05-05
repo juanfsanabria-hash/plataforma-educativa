@@ -1,0 +1,89 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ evaluation_name }} — {{ course.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+  <div>
+    <p class="text-sm text-gray-500 mb-1">
+      <a href="/cursos/{{ course.id }}/calificaciones/" class="hover:text-edu-primary">← Calificaciones</a>
+    </p>
+    <h1 class="text-2xl font-bold text-gray-900">{{ evaluation_name }}</h1>
+    <p class="text-sm text-gray-500 mt-1">
+      {{ eval_type|title }} · Puntaje máximo: {{ max_score }} · Peso: {{ weight }}
+    </p>
+  </div>
+
+  {% if rows %}
+  <form method="POST" id="grade-form">
+    {% csrf_token %}
+    <input type="hidden" name="eval_type" value="{{ eval_type }}">
+    <input type="hidden" name="max_score" value="{{ max_score }}">
+    <input type="hidden" name="weight" value="{{ weight }}">
+
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-base font-semibold text-gray-900">Estudiantes ({{ rows|length }})</h2>
+        <span class="text-xs text-gray-400">Máximo: {{ max_score }} puntos</span>
+      </div>
+
+      <div class="divide-y divide-gray-50">
+        {% for row in rows %}
+        <div class="flex items-center px-6 py-3 gap-4">
+          <div class="w-8 h-8 rounded-full bg-edu-primary bg-opacity-10 flex items-center justify-center text-edu-primary font-bold text-sm flex-shrink-0">
+            {{ row.enrollment.student.first_name|first }}{{ row.enrollment.student.last_name|first }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900">
+              {{ row.enrollment.student.get_full_name }}
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <input type="number"
+                   name="score_{{ row.enrollment.id }}"
+                   value="{% if row.grade and row.grade.score is not None %}{{ row.grade.score }}{% endif %}"
+                   min="0" max="{{ max_score }}" step="0.5"
+                   placeholder="—"
+                   class="w-24 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-edu-primary score-input"
+                   data-max="{{ max_score }}">
+            <input type="text"
+                   name="notes_{{ row.enrollment.id }}"
+                   value="{% if row.grade %}{{ row.grade.notes }}{% endif %}"
+                   placeholder="Observaciones"
+                   class="w-48 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-edu-primary">
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50">
+        <a href="/cursos/{{ course.id }}/calificaciones/"
+           class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-white transition">
+          Cancelar
+        </a>
+        <button type="submit"
+                class="px-6 py-2 bg-edu-primary text-white text-sm rounded-lg hover:bg-edu-secondary transition font-medium">
+          Guardar todo
+        </button>
+      </div>
+    </div>
+  </form>
+  {% else %}
+  <div class="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-200">
+    <p class="text-gray-400">No hay estudiantes inscritos en este curso.</p>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+document.querySelectorAll('.score-input').forEach(function(input) {
+  input.addEventListener('change', function() {
+    var max = parseFloat(this.dataset.max);
+    var val = parseFloat(this.value);
+    if (!isNaN(val) && val > max) { this.value = max; }
+    if (!isNaN(val) && val < 0) { this.value = 0; }
+  });
+});
+</script>
+{% endblock %}

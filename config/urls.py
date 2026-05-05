@@ -32,6 +32,10 @@ from core.views import (
     topic_create,
     topic_edit,
     material_upload,
+    grade_list,
+    grade_entry,
+    attendance_list,
+    attendance_entry,
 )
 
 # API Router
@@ -96,6 +100,14 @@ urlpatterns = [
 
     # Material upload view
     path('temas/<int:topic_id>/materiales/subir/', material_upload, name='material-upload'),
+
+    # Grade management views
+    path('cursos/<int:course_id>/calificaciones/', grade_list, name='grade-list'),
+    path('cursos/<int:course_id>/calificaciones/<str:evaluation_name>/', grade_entry, name='grade-entry'),
+
+    # Attendance management views
+    path('cursos/<int:course_id>/asistencia/', attendance_list, name='attendance-list'),
+    path('cursos/<int:course_id>/asistencia/<str:date_str>/', attendance_entry, name='attendance-entry'),
 
     # REST API endpoints
     path('api/v1/', include(router.urls)),

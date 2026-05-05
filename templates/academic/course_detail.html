@@ -14,10 +14,20 @@
       </p>
     </div>
     {% if is_teacher %}
-    <a href="/cursos/{{ course.id }}/temas/nuevo/"
-       class="px-4 py-2 bg-edu-primary text-white text-sm rounded-lg hover:bg-edu-secondary transition">
-      + Nuevo tema
-    </a>
+    <div class="flex items-center space-x-2">
+      <a href="/cursos/{{ course.id }}/asistencia/"
+         class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        Asistencia
+      </a>
+      <a href="/cursos/{{ course.id }}/calificaciones/"
+         class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        Calificaciones
+      </a>
+      <a href="/cursos/{{ course.id }}/temas/nuevo/"
+         class="px-4 py-2 bg-edu-primary text-white text-sm rounded-lg hover:bg-edu-secondary transition">
+        + Nuevo tema
+      </a>
+    </div>
     {% endif %}
   </div>
 

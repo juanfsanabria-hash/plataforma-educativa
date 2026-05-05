@@ -72,14 +72,18 @@
         <p class="text-sm font-semibold text-gray-700">Crear Curso</p>
       </a>
       {% endif %}
-      <a href="/admin/academic/grade/add/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+      {% if courses %}
+      <a href="/cursos/{{ courses.0.id }}/calificaciones/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
         <span class="text-3xl mb-2">🎯</span>
         <p class="text-sm font-semibold text-gray-700">Registrar Nota</p>
       </a>
-      <a href="/admin/academic/attendance/add/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
+      {% endif %}
+      {% if courses %}
+      <a href="/cursos/{{ courses.0.id }}/asistencia/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
         <span class="text-3xl mb-2">✅</span>
         <p class="text-sm font-semibold text-gray-700">Registrar Asistencia</p>
       </a>
+      {% endif %}
       <a href="/admin/communication/announcement/add/" class="flex flex-col items-center p-4 rounded-xl border border-gray-100 hover:border-edu-primary hover:shadow-sm transition text-center">
         <span class="text-3xl mb-2">📢</span>
         <p class="text-sm font-semibold text-gray-700">Crear Anuncio</p>
