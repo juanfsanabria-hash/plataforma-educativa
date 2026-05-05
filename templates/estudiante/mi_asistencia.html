@@ -1,0 +1,70 @@
+{% extends 'base/base.html' %}
+{% block title %}Mi Asistencia{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+  <h1 class="text-2xl font-bold text-gray-900">Mi Asistencia</h1>
+
+  {% for item in courses_data %}
+  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div>
+        <p class="font-semibold text-gray-900">{{ item.enrollment.course.name }}</p>
+        <p class="text-xs text-gray-400">{{ item.total }} clases registradas</p>
+      </div>
+      {% if item.rate is not None %}
+      <span class="px-3 py-1 rounded-full text-xs font-semibold
+        {% if item.rate >= 80 %}bg-green-100 text-green-700
+        {% elif item.rate >= 60 %}bg-yellow-100 text-yellow-700
+        {% else %}bg-red-100 text-red-600{% endif %}">
+        {{ item.rate }}% presencia
+      </span>
+      {% endif %}
+    </div>
+
+    {% if item.total %}
+    <div class="grid grid-cols-3 divide-x divide-gray-100 border-b border-gray-100 text-center text-xs">
+      <div class="py-3">
+        <p class="font-semibold text-green-600">{{ item.present }}</p>
+        <p class="text-gray-400">Presentes</p>
+      </div>
+      <div class="py-3">
+        <p class="font-semibold text-red-500">{{ item.total|add:"-1"|add:"1" }}</p>
+        <p class="text-gray-400">Ausencias</p>
+      </div>
+      <div class="py-3">
+        <p class="font-semibold text-gray-700">{{ item.rate|default:"—" }}%</p>
+        <p class="text-gray-400">Asistencia</p>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if item.records %}
+    <div class="divide-y divide-gray-50 max-h-64 overflow-y-auto">
+      {% for a in item.records %}
+      <div class="flex items-center justify-between px-6 py-2.5">
+        <span class="text-sm text-gray-600">{{ a.date|date:"d/m/Y" }}</span>
+        <span class="px-3 py-0.5 rounded-full text-xs font-medium
+          {% if a.status == 'present' %}bg-green-100 text-green-700
+          {% elif a.status == 'absent' %}bg-red-100 text-red-600
+          {% elif a.status == 'late' %}bg-yellow-100 text-yellow-700
+          {% else %}bg-blue-100 text-blue-700{% endif %}">
+          {% if a.status == 'present' %}Presente
+          {% elif a.status == 'absent' %}Ausente
+          {% elif a.status == 'late' %}Tarde
+          {% else %}Excusado{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-xs text-gray-400 py-5">Sin registros aún.</p>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div class="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-200">
+    <p class="text-gray-400">No estás inscrito en ningún curso activo.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

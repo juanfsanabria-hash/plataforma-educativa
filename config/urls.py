@@ -38,6 +38,13 @@ from core.views import (
     attendance_entry,
     event_create,
     mark_all_read,
+    student_grades,
+    student_attendance,
+    parent_child_grades,
+    parent_child_attendance,
+    announcement_list,
+    announcement_create,
+    announcement_detail,
 )
 
 # API Router
@@ -92,6 +99,19 @@ urlpatterns = [
 
     # Notifications
     path('api/notificaciones/marcar-todas/', mark_all_read, name='mark-all-read'),
+
+    # Student consolidated views
+    path('mis-notas/', student_grades, name='student-grades'),
+    path('mi-asistencia/', student_attendance, name='student-attendance'),
+
+    # Parent child views
+    path('mis-hijos/<int:student_id>/notas/', parent_child_grades, name='parent-child-grades'),
+    path('mis-hijos/<int:student_id>/asistencia/', parent_child_attendance, name='parent-child-attendance'),
+
+    # Announcements
+    path('anuncios/', announcement_list, name='announcement-list'),
+    path('anuncios/nuevo/', announcement_create, name='announcement-create'),
+    path('anuncios/<int:pk>/', announcement_detail, name='announcement-detail'),
 
     # Event detail view
     path('eventos/<int:event_id>/', event_detail, name='event-detail'),

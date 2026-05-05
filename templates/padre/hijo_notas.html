@@ -1,0 +1,83 @@
+{% extends 'base/base.html' %}
+{% block title %}Notas de {{ child.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-sm text-gray-500 mb-1">
+        <a href="/dashboard/padre/" class="hover:text-edu-primary">← Dashboard</a>
+      </p>
+      <h1 class="text-2xl font-bold text-gray-900">Notas — {{ child.get_full_name }}</h1>
+    </div>
+    {% if overall_avg is not None %}
+    <span class="px-4 py-2 rounded-xl text-sm font-semibold
+      {% if overall_avg >= 70 %}bg-green-100 text-green-700
+      {% elif overall_avg >= 50 %}bg-yellow-100 text-yellow-700
+      {% else %}bg-red-100 text-red-600{% endif %}">
+      Promedio general: {{ overall_avg|floatformat:1 }}%
+    </span>
+    {% endif %}
+  </div>
+
+  {% for item in courses_data %}
+  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div>
+        <p class="font-semibold text-gray-900">{{ item.enrollment.course.name }}</p>
+        <p class="text-xs text-gray-400">{{ item.enrollment.course.teacher.get_full_name }}</p>
+      </div>
+      {% if item.avg is not None %}
+      <span class="px-3 py-1 rounded-full text-xs font-semibold
+        {% if item.avg >= 70 %}bg-green-100 text-green-700
+        {% elif item.avg >= 50 %}bg-yellow-100 text-yellow-700
+        {% else %}bg-red-100 text-red-600{% endif %}">
+        {{ item.avg|floatformat:1 }}%
+      </span>
+      {% endif %}
+    </div>
+    {% if item.grades %}
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+        <tr>
+          <th class="px-6 py-3 text-left">Evaluación</th>
+          <th class="px-6 py-3 text-left">Tipo</th>
+          <th class="px-6 py-3 text-center">Nota</th>
+          <th class="px-6 py-3 text-center">Máx</th>
+          <th class="px-6 py-3 text-center">%</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        {% for g in item.grades %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-3 font-medium text-gray-900">{{ g.evaluation_name }}</td>
+          <td class="px-6 py-3 text-gray-500">{{ g.evaluation_type|title }}</td>
+          <td class="px-6 py-3 text-center">
+            {% if g.score is not None %}{{ g.score }}{% else %}<span class="text-gray-300">—</span>{% endif %}
+          </td>
+          <td class="px-6 py-3 text-center text-gray-400">{{ g.max_score }}</td>
+          <td class="px-6 py-3 text-center">
+            {% if g.score is not None %}
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium
+              {% if g.percentage >= 70 %}bg-green-100 text-green-700
+              {% elif g.percentage >= 50 %}bg-yellow-100 text-yellow-700
+              {% else %}bg-red-100 text-red-600{% endif %}">
+              {{ g.percentage|floatformat:1 }}%
+            </span>
+            {% else %}<span class="text-gray-300">—</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-center text-xs text-gray-400 py-5">Sin notas registradas aún.</p>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div class="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-200">
+    <p class="text-gray-400">{{ child.first_name }} no está inscrito en ningún curso activo.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -9,7 +9,7 @@ from django.utils.dateparse import parse_datetime
 from django.views.decorators.http import require_http_methods
 from django import forms as django_forms
 from accounts.models import CustomUser, Institution
-from communication.models import Notification
+from communication.models import Notification, Announcement
 from accounts.forms import LoginForm, RegisterForm
 from academic.models import Course, Enrollment, Grade, Attendance, Topic, TopicMaterial
 from administrative.models import Payment, StudentProfile
@@ -381,10 +381,22 @@ def course_detail(request, course_id):
 
     qs = course.topics.all() if is_teacher else course.topics.filter(is_published=True)
     topics = qs.prefetch_related('materials')
+
+    student_grades_qs = None
+    student_attendance_qs = None
+    if is_enrolled:
+        enrollment = Enrollment.objects.filter(course=course, student=user, status='active').first()
+        if enrollment:
+            student_grades_qs = Grade.objects.filter(enrollment=enrollment).order_by('evaluation_name')
+            student_attendance_qs = Attendance.objects.filter(enrollment=enrollment).order_by('-date')
+
     return render(request, 'academic/course_detail.html', {
         'course': course,
         'topics': topics,
         'is_teacher': is_teacher,
+        'is_enrolled': is_enrolled,
+        'student_grades': student_grades_qs,
+        'student_attendance': student_attendance_qs,
     })
 
 
@@ -766,6 +778,151 @@ def mark_all_read(request):
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True, read_at=now)
     return JsonResponse({'ok': True})
+
+
+# ── Notas consolidadas (estudiante) ──────────────────────────────────────────
+
+@login_required
+@role_required(['estudiante'])
+def student_grades(request):
+    enrollments = (
+        Enrollment.objects.filter(student=request.user, status='active')
+        .select_related('course')
+        .prefetch_related('grades')
+    )
+    courses_data = []
+    overall_scores = []
+    for enrollment in enrollments:
+        grades = list(enrollment.grades.all())
+        scored = [g for g in grades if g.score is not None]
+        avg = sum(float(g.score) for g in scored) / len(scored) if scored else None
+        if avg is not None:
+            overall_scores.append(avg)
+        courses_data.append({'enrollment': enrollment, 'grades': grades, 'avg': avg})
+    overall_avg = sum(overall_scores) / len(overall_scores) if overall_scores else None
+    return render(request, 'estudiante/mis_notas.html', {
+        'courses_data': courses_data,
+        'overall_avg': overall_avg,
+    })
+
+
+@login_required
+@role_required(['estudiante'])
+def student_attendance(request):
+    enrollments = (
+        Enrollment.objects.filter(student=request.user, status='active')
+        .select_related('course')
+    )
+    courses_data = []
+    for enrollment in enrollments:
+        records = Attendance.objects.filter(enrollment=enrollment).order_by('-date')
+        total = records.count()
+        present = records.filter(status='present').count()
+        rate = round(present / total * 100) if total else None
+        courses_data.append({'enrollment': enrollment, 'records': records, 'total': total, 'present': present, 'rate': rate})
+    return render(request, 'estudiante/mi_asistencia.html', {'courses_data': courses_data})
+
+
+# ── Notas/asistencia de un hijo (padre) ──────────────────────────────────────
+
+def _get_child_or_403(request, student_id):
+    child = get_object_or_404(CustomUser, id=student_id, role='estudiante')
+    is_parent = StudentProfile.objects.filter(user=child, parent=request.user).exists()
+    if not is_parent:
+        return None
+    return child
+
+
+@login_required
+@role_required(['padre'])
+def parent_child_grades(request, student_id):
+    child = _get_child_or_403(request, student_id)
+    if not child:
+        return HttpResponseForbidden()
+    enrollments = (
+        Enrollment.objects.filter(student=child, status='active')
+        .select_related('course')
+        .prefetch_related('grades')
+    )
+    courses_data = []
+    overall_scores = []
+    for enrollment in enrollments:
+        grades = list(enrollment.grades.all())
+        scored = [g for g in grades if g.score is not None]
+        avg = sum(float(g.score) for g in scored) / len(scored) if scored else None
+        if avg is not None:
+            overall_scores.append(avg)
+        courses_data.append({'enrollment': enrollment, 'grades': grades, 'avg': avg})
+    overall_avg = sum(overall_scores) / len(overall_scores) if overall_scores else None
+    return render(request, 'padre/hijo_notas.html', {
+        'child': child,
+        'courses_data': courses_data,
+        'overall_avg': overall_avg,
+    })
+
+
+@login_required
+@role_required(['padre'])
+def parent_child_attendance(request, student_id):
+    child = _get_child_or_403(request, student_id)
+    if not child:
+        return HttpResponseForbidden()
+    enrollments = (
+        Enrollment.objects.filter(student=child, status='active')
+        .select_related('course')
+    )
+    courses_data = []
+    for enrollment in enrollments:
+        records = Attendance.objects.filter(enrollment=enrollment).order_by('-date')
+        total = records.count()
+        present = records.filter(status='present').count()
+        rate = round(present / total * 100) if total else None
+        courses_data.append({'enrollment': enrollment, 'records': records, 'total': total, 'present': present, 'rate': rate})
+    return render(request, 'padre/hijo_asistencia.html', {'child': child, 'courses_data': courses_data})
+
+
+# ── Anuncios ──────────────────────────────────────────────────────────────────
+
+ANNOUNCEMENT_CREATORS = {'admin', 'director', 'docente'}
+
+
+class AnnouncementForm(django_forms.ModelForm):
+    class Meta:
+        model = Announcement
+        fields = ['title', 'content', 'is_published']
+        widgets = {
+            'content': django_forms.Textarea(attrs={'rows': 6}),
+        }
+
+
+@login_required
+def announcement_list(request):
+    qs = Announcement.objects.filter(is_published=True).select_related('author').order_by('-created_at')
+    return render(request, 'communication/announcement_list.html', {'announcements': qs})
+
+
+@login_required
+def announcement_create(request):
+    if request.user.role not in ANNOUNCEMENT_CREATORS:
+        return HttpResponseForbidden()
+    if request.method == 'POST':
+        form = AnnouncementForm(request.POST)
+        if form.is_valid():
+            ann = form.save(commit=False)
+            ann.author = request.user
+            ann.institution = getattr(request.user, 'institution', None)
+            ann.save()
+            messages.success(request, 'Anuncio publicado.')
+            return redirect('announcement-list')
+    else:
+        form = AnnouncementForm()
+    return render(request, 'communication/announcement_form.html', {'form': form})
+
+
+@login_required
+def announcement_detail(request, pk):
+    ann = get_object_or_404(Announcement, pk=pk, is_published=True)
+    return render(request, 'communication/announcement_detail.html', {'ann': ann})
 
 
 def health_check(request):

@@ -1,0 +1,28 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ announcement.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+  <div>
+    <p class="text-sm text-gray-500 mb-1">
+      <a href="/anuncios/" class="hover:text-edu-primary">← Anuncios</a>
+    </p>
+    <h1 class="text-2xl font-bold text-gray-900">{{ announcement.title }}</h1>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+    <div class="flex items-center gap-3 text-sm text-gray-400 border-b border-gray-100 pb-4">
+      <span class="font-medium text-gray-600">{{ announcement.author.get_full_name }}</span>
+      <span>·</span>
+      <span>{{ announcement.author.get_role_display }}</span>
+      <span>·</span>
+      <span>{{ announcement.created_at|date:"d/m/Y H:i" }}</span>
+      {% if not announcement.is_published %}
+      <span class="ml-auto px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium">Borrador</span>
+      {% endif %}
+    </div>
+
+    <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{{ announcement.content }}</div>
+  </div>
+</div>
+{% endblock %}

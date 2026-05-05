@@ -31,6 +31,22 @@
     {% endif %}
   </div>
 
+  {% if is_enrolled and not is_teacher %}
+  <!-- Tabs for enrolled students -->
+  <div>
+    <div class="flex space-x-1 border-b border-gray-200 mb-4">
+      <button onclick="showTab('contenido')" id="tab-btn-contenido"
+              class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-edu-primary text-edu-primary transition">Contenido</button>
+      <button onclick="showTab('notas')" id="tab-btn-notas"
+              class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">Mis Notas</button>
+      <button onclick="showTab('asistencia')" id="tab-btn-asistencia"
+              class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">Mi Asistencia</button>
+    </div>
+
+    <!-- Contenido tab -->
+    <div id="tab-contenido">
+  {% endif %}
+
   {% if topics %}
   <div class="space-y-3">
     {% for topic in topics %}
@@ -77,6 +93,98 @@
       {% endif %}
     </p>
   </div>
+  {% if is_enrolled and not is_teacher %}
+    </div><!-- end contenido tab -->
+
+    <!-- Mis Notas tab -->
+    <div id="tab-notas" style="display:none">
+      {% if student_grades %}
+      <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+            <tr>
+              <th class="px-6 py-3 text-left">Evaluación</th>
+              <th class="px-6 py-3 text-left">Tipo</th>
+              <th class="px-6 py-3 text-center">Nota</th>
+              <th class="px-6 py-3 text-center">Máximo</th>
+              <th class="px-6 py-3 text-center">%</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            {% for g in student_grades %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-3 font-medium text-gray-900">{{ g.evaluation_name }}</td>
+              <td class="px-6 py-3 text-gray-500">{{ g.evaluation_type|title }}</td>
+              <td class="px-6 py-3 text-center">{% if g.score is not None %}{{ g.score }}{% else %}<span class="text-gray-300">—</span>{% endif %}</td>
+              <td class="px-6 py-3 text-center text-gray-400">{{ g.max_score }}</td>
+              <td class="px-6 py-3 text-center">
+                {% if g.score is not None %}
+                <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                  {% if g.percentage >= 70 %}bg-green-100 text-green-700
+                  {% elif g.percentage >= 50 %}bg-yellow-100 text-yellow-700
+                  {% else %}bg-red-100 text-red-600{% endif %}">
+                  {{ g.percentage|floatformat:1 }}%
+                </span>
+                {% else %}<span class="text-gray-300">—</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-200">
+        <p class="text-gray-400 text-sm">No hay notas registradas aún.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Mi Asistencia tab -->
+    <div id="tab-asistencia" style="display:none">
+      {% if student_attendance %}
+      <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div class="divide-y divide-gray-50">
+          {% for a in student_attendance %}
+          <div class="flex items-center justify-between px-6 py-3">
+            <span class="text-sm text-gray-700">{{ a.date|date:"d/m/Y" }}</span>
+            <span class="px-3 py-1 rounded-full text-xs font-medium
+              {% if a.status == 'present' %}bg-green-100 text-green-700
+              {% elif a.status == 'absent' %}bg-red-100 text-red-600
+              {% elif a.status == 'late' %}bg-yellow-100 text-yellow-700
+              {% else %}bg-blue-100 text-blue-700{% endif %}">
+              {{ a.get_status_display|default:a.status|title }}
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+      <div class="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-200">
+        <p class="text-gray-400 text-sm">No hay registros de asistencia aún.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div><!-- end tabs wrapper -->
   {% endif %}
+
 </div>
+
+{% if is_enrolled and not is_teacher %}
+<script>
+function showTab(name) {
+  ['contenido','notas','asistencia'].forEach(function(t) {
+    document.getElementById('tab-' + t).style.display = (t === name) ? '' : 'none';
+    var btn = document.getElementById('tab-btn-' + t);
+    if (t === name) {
+      btn.classList.add('border-edu-primary','text-edu-primary');
+      btn.classList.remove('border-transparent','text-gray-500');
+    } else {
+      btn.classList.remove('border-edu-primary','text-edu-primary');
+      btn.classList.add('border-transparent','text-gray-500');
+    }
+  });
+}
+</script>
+{% endif %}
 {% endblock %}
